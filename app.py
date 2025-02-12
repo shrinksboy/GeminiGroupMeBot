@@ -32,6 +32,7 @@ import http
 from flask import Flask, request, jsonify
 import logging
 import os
+import requests
 
 app = Flask(__name__)
 
@@ -109,10 +110,10 @@ def process_message(v3_message):
 
         # Send the POST request to the GroupMe API
         try:
-            response = request.post(GROUPME_API_URL, json=payload)
+            response = requests.post(GROUPME_API_URL, json=payload)
             response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
             logger.info(f"Successfully sent message to GroupMe. Status code: {response.status_code}")
-        except Exception as e:
+        except requests.exceptions.RequestException as e:
             logger.error(f"Error sending message to GroupMe: {e}")
             return f"Error sending message to GroupMe: {e}"
 
