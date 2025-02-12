@@ -12,4 +12,4 @@ COPY . .
 ENV PORT 8080
 
 # CMD ["python3", "app.py"]
-CMD gunicorn -b :$PORT main:app
+CMD gunicorn -b :$PORT app:app
