@@ -37,7 +37,7 @@ app = Flask(__name__)
 
 GROUPME_API_URL = "https://api.groupme.com/v3/bots/post"
 
-# Configure logging (useful for debugging on GCP)
+# Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -50,13 +50,13 @@ def webhook_handler():
     logger.info("Received request from webhook.")
 
     try:
-        # Extract data from the request (assuming JSON format)
+        # Extract data from the request
         data = request.get_json()
 
         # Process the V3 message (Implement your logic here)
         if data:
             logger.info(f"Received V3 message: {data}")
-            response_message = process_message(data)  # Call a function to handle the processing
+            response_message = process_message(data)  # Call function to handle the processing
         else:
             logger.warning("No data received in the request.")
             return jsonify({"status": "error", "message": "No data received"}), 400  # Bad Request
@@ -64,7 +64,7 @@ def webhook_handler():
         # Create a response
         response_data = {
             "status": "success",
-            "response": "Message processed" #can change this to be some success message
+            "response": "Message processed" #success message
         }
         logger.info(f"Sending response: {response_data}")
         return jsonify(response_data), 200  # OK
@@ -107,7 +107,7 @@ def process_message(v3_message):
 
         # Send the POST request to the GroupMe API
         try:
-            response = request.post(GROUPME_API_URL, json=payload)
+            response = request.post("https://api.groupme.com/v3/bots/post", json=payload)
             response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
             logger.info(f"Successfully sent message to GroupMe. Status code: {response.status_code}")
         except request.exceptions.RequestException as e:
