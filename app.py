@@ -90,38 +90,42 @@ def process_message(v3_message):
         sender_id = v3_message.get("sender_id", "Unknown Sender ID")
 
         # Build a response based on the extracted information
-        response_text = ""
 
-        # Add your custom logic here to process the message further.
-        # For example, you could:
-        #   - Check if the message contains specific keywords.
-        #   - Perform an action based on the message content.
-        #   - Interact with other APIs.
-
-        #Example action - if the text contains "test", return "test successful"
+        # Status test
         if "bot-status-test" in message_text.lower():
             response_text = "Test successful"
+            response_text = "ye"
 
-        # Construct the payload for the GroupMe API
-        payload = {
-            "bot_id": BOT_ID,
-            "text": response_text
-        }
+        # Check if response needs to be sent back
+        if message_text.lower().startswith("@chatius"):
+             response_text = "Greetings human"
+             response_payload = {
+                  "bot_id": BOT_ID,
+                "text": response_text
+             }
+             send_response(response_payload)
 
-        # Send the POST request to the GroupMe API
-        try:
-            response = requests.post(GROUPME_API_URL, json=payload)
-            response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
-            logger.info(f"Successfully sent message to GroupMe. Status code: {response.status_code}")
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Error sending message to GroupMe: {e}")
-            return f"Error sending message to GroupMe: {e}"
-
-        return "Message sent to GroupMe."  # success message
+        
 
     except Exception as e:
         logger.error(f"Error processing message: {e}")
         return f"Error processing message: {e}"  # Return an error message to the webhook caller
+    
+    
+def send_response(response_payload):
+    """
+    Send POST response to groupme
+    """
+    try:
+            response = requests.post(GROUPME_API_URL, json=response_payload)
+            response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
+            logger.info(f"Successfully sent message to GroupMe. Status code: {response.status_code}")
+    except requests.exceptions.RequestException as e:
+            logger.error(f"Error sending message to GroupMe: {e}")
+            return f"Error sending message to GroupMe: {e}"
+
+    return "Message sent to GroupMe."  # success message
+
 
 
 @app.route('/health', methods=['GET'])
