@@ -108,7 +108,7 @@ def gemini_request(input_text):
      response = client.models.generate_content(
         model="gemini-2.0-flash", contents=input_text
     )
-     return response
+     return response.text
 
 
 
