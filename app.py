@@ -117,31 +117,31 @@ def gemini_request(input_text):
     )
      return response.text
 
-# def get_chat_session(chat_id):
-#     """Retrieves chat session from Cloud Datastore."""
-#     key = datastore_client.key("ChatSession", chat_id)
-#     entity = datastore_client.get(key)
-#     if entity is None:
-#         # Create a new chat session if it doesn't exist
-#         model = genai.GenerativeModel('gemini-pro')
-#         chat = model.start_chat()
-#         entity = datastore.Entity(key=key)
-#         entity["session"] = chat.get_history()  # Store initial chat history
-#         datastore_client.put(entity)
-#         return chat
-#     else:
-#         model = genai.GenerativeModel('gemini-pro')
-#         chat = model.start_chat(history = entity["session"])
-#         # Load History
+def get_chat_session(chat_id):
+    """Retrieves chat session from Cloud Datastore."""
+    key = datastore_client.key("ChatSession", chat_id)
+    entity = datastore_client.get(key)
+    if entity is None:
+        # Create a new chat session if it doesn't exist
+        model = genai.GenerativeModel('gemini-pro')
+        chat = model.start_chat()
+        entity = datastore.Entity(key=key)
+        entity["session"] = chat.get_history()  # Store initial chat history
+        datastore_client.put(entity)
+        return chat
+    else:
+        model = genai.GenerativeModel('gemini-pro')
+        chat = model.start_chat(history = entity["session"])
+        # Load History
 
-#         return chat
+        return chat
     
-# def save_chat_session(chat_id, chat):
-#     """Saves the chat history to Cloud Datastore."""
-#     key = datastore_client.key("ChatSession", chat_id)
-#     entity = datastore.Entity(key=key)
-#     entity["session"] = chat.get_history()
-#     datastore_client.put(entity)
+def save_chat_session(chat_id, chat):
+    """Saves the chat history to Cloud Datastore."""
+    key = datastore_client.key("ChatSession", chat_id)
+    entity = datastore.Entity(key=key)
+    entity["session"] = chat.get_history()
+    datastore_client.put(entity)
 
 
 @app.route('/health', methods=['GET'])
