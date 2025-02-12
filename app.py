@@ -1,8 +1,8 @@
-
+#Jonah Casimir GroupMe Gemini Chatbot
 ################################################################################################################################
 
 from google import genai
-#from google import types
+from google.cloud import datastore
 import http
 from flask import Flask, request, jsonify
 import logging
@@ -16,10 +16,14 @@ BOT_ID = os.environ.get("BOT_ID")  # Get Groupme bot ID from the environment
 GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")  # Get google api key from the environment
 GROUPME_API_URL = "https://api.groupme.com/v3/bots/post"  # GroupMe API endpoint
 
+genai.configure(api_key=GOOGLE_API_KEY)
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Initialize Cloud Datastore client
+datastore_client = datastore.Client()
 
 @app.route('/', methods=['POST'])
 def webhook_handler():
@@ -103,18 +107,45 @@ def send_response(response_text):
 
     return "Message sent to GroupMe."  # success message
 
+##########################################
+
 def gemini_request(input_text):
-     client = genai.Client(api_key=GOOGLE_API_KEY)
-     chat = client.chats.create(model="gemini-2.0-flash")
+     chat = get_chat_session(group_id)
      response = chat.send_message(input_text)
+     save_chat_session(group_id, chat)
      return response.text
 
+def get_chat_session(chat_id):
+    """Retrieves chat session from Cloud Datastore."""
+    key = datastore_client.key("ChatSession", chat_id)
+    entity = datastore_client.get(key)
+    if entity is None:
+        # Create a new chat session if it doesn't exist
+        model = genai.GenerativeModel('gemini-pro')
+        chat = model.start_chat()
+        entity = datastore.Entity(key=key)
+        entity["session"] = chat.get_history()  # Store initial chat history
+        datastore_client.put(entity)
+        return chat
+    else:
+        model = genai.GenerativeModel('gemini-pro')
+        chat = model.start_chat(history = entity["session"])
+        # Load History
+
+        return chat
+    
+def save_chat_session(chat_id, chat):
+    """Saves the chat history to Cloud Datastore."""
+    key = datastore_client.key("ChatSession", chat_id)
+    entity = datastore.Entity(key=key)
+    entity["session"] = chat.get_history()
+    datastore_client.put(entity)
 
 
 @app.route('/health', methods=['GET'])
 def health_check():
     """
-    Simple health check endpoint for Google Cloud.  Useful for auto-scaling and monitoring.
+    Simple health check endpoint for Google Cloud
     """
     return "OK", 200
 
