@@ -16,7 +16,7 @@ BOT_ID = os.environ.get("BOT_ID")  # Get Groupme bot ID from the environment
 GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")  # Get google api key from the environment
 GROUPME_API_URL = "https://api.groupme.com/v3/bots/post"  # GroupMe API endpoint
 
-genai.configure(api_key=GOOGLE_API_KEY)
+client = genai.Client(api_key=GOOGLE_API_KEY)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
