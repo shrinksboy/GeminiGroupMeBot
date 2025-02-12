@@ -2,6 +2,7 @@
 ################################################################################################################################
 
 from google import genai
+from google import types
 import http
 from flask import Flask, request, jsonify
 import logging

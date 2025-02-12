@@ -1,4 +1,4 @@
 Flask
 gunicorn
 Werkzeug
-google-generativeai
+google-genai
