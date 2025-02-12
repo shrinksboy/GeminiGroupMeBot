@@ -1,4 +1,4 @@
-# client = genai.Client(api_key="AIzaSyDJDntH8438Nmv8Ywja-W0gNZ9oH4q06w8")
+# client = genai.Client(api_key=GOOGLE_API_KEY)
 # response = client.models.generate_content(
 #     model="gemini-2.0-flash", contents="give me a haiku about cookies"
 # )
@@ -61,7 +61,7 @@ def webhook_handler():
         # Create a response
         response_data = {
             "status": "success",
-            "response": response_message
+            "response": "Message processed" #can change this to be some success message
         }
         logger.info(f"Sending response: {response_data}")
         return jsonify(response_data), 200  # OK
@@ -96,7 +96,22 @@ def process_message(v3_message):
         if "test" in message_text.lower():
             response_text = "Test successful"
 
-        return response_text
+        # Construct the payload for the GroupMe API
+        payload = {
+            "bot_id": BOT_ID,
+            "text": response_text
+        }
+
+        # Send the POST request to the GroupMe API
+        try:
+            response = requests.post(https://api.groupme.com/v3/bots/post, json=payload)
+            response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
+            logger.info(f"Successfully sent message to GroupMe. Status code: {response.status_code}")
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Error sending message to GroupMe: {e}")
+            return f"Error sending message to GroupMe: {e}"
+
+        return "Message sent to GroupMe."  # Can change to another success message
 
     except Exception as e:
         logger.error(f"Error processing message: {e}")
