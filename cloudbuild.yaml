@@ -33,12 +33,12 @@ steps:
 
 # Configure Cloud Build options
 options:
-  defaultLogsBucketBehavior: CLOUD_LOGGING_ONLY
+  defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET
   # You'll likely need to specify a service account. The Compute Engine
   # default service account is often used.  Enable the Cloud Build API,
   # as mentioned in one of the previous errors.
   serviceAccount: '385396516979-compute@developer.gserviceaccount.com' #Replace the Project ID
-#  logging: CLOUD_LOGGING_ONLY # Or NONE if you don't want logs stored in Cloud Storage
+  logging: NONE # Or NONE if you don't want logs stored in Cloud Storage
 
 images:
   - 'us-central1-docker.pkg.dev/stunning-symbol-450620-m7/geminigroupmebot/geminigroupmebot:latest' # Make sure this matches your image name
