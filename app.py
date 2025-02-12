@@ -35,7 +35,9 @@ import os
 
 app = Flask(__name__)
 
-GROUPME_API_URL = "https://api.groupme.com/v3/bots/post"
+# Load environment variables
+BOT_ID = os.environ.get("BOT_ID")  # Get your bot ID from the environment
+GROUPME_API_URL = "https://api.groupme.com/v3/bots/post"  # GroupMe API endpoint
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -107,7 +109,7 @@ def process_message(v3_message):
 
         # Send the POST request to the GroupMe API
         try:
-            response = request.post("https://api.groupme.com/v3/bots/post", json=payload)
+            response = request.post(GROUPME_API_URL, json=payload)
             response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
             logger.info(f"Successfully sent message to GroupMe. Status code: {response.status_code}")
         except request.exceptions.RequestException as e:
