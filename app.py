@@ -1,33 +1,7 @@
-# client = genai.Client(api_key=GOOGLE_API_KEY)
-# response = client.models.generate_content(
-#     model="gemini-2.0-flash", contents="give me a haiku about cookies"
-# )
-# print(response.text)
 
 ################################################################################################################################
 
-
-# import os
-
-# from flask import Flask
-
-# app = Flask(__name__)
-
-
-# @app.route("/")
-# def hello_world():
-#     """Example Hello World route."""
-#     name = os.environ.get("NAME", "World")
-#     return f"Goodbye cruel {name}!"
-
-
-# if __name__ == "__main__":
-#     app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
-
-
-################################################################################################################################
-
-
+from google import genai
 import http
 from flask import Flask, request, jsonify
 import logging
@@ -37,7 +11,8 @@ import requests
 app = Flask(__name__)
 
 # Load environment variables
-BOT_ID = os.environ.get("BOT_ID")  # Get your bot ID from the environment
+BOT_ID = os.environ.get("BOT_ID")  # Get Groupme bot ID from the environment
+GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")  # Get google api key from the environment
 GROUPME_API_URL = "https://api.groupme.com/v3/bots/post"  # GroupMe API endpoint
 
 # Configure logging
@@ -93,17 +68,13 @@ def process_message(v3_message):
 
         # Status test
         if "bot-status-test" in message_text.lower():
-            response_text = "Test successful"
-            response_text = "ye"
+            send_response(response_text="Test Successful")
+
 
         # Check if response needs to be sent back
         if message_text.lower().startswith("@chatius"):
              response_text = "Greetings human"
-             response_payload = {
-                  "bot_id": BOT_ID,
-                "text": response_text
-             }
-             send_response(response_payload)
+             send_response(response_text)
 
         
 
@@ -112,10 +83,14 @@ def process_message(v3_message):
         return f"Error processing message: {e}"  # Return an error message to the webhook caller
     
     
-def send_response(response_payload):
+def send_response(response_text):
     """
     Send POST response to groupme
     """
+    response_payload = {
+                  "bot_id": BOT_ID,
+                "text": response_text
+             }
     try:
             response = requests.post(GROUPME_API_URL, json=response_payload)
             response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
@@ -125,6 +100,12 @@ def send_response(response_payload):
             return f"Error sending message to GroupMe: {e}"
 
     return "Message sent to GroupMe."  # success message
+
+def gemini_request(input_text):
+     client = genai.Client(api_key=GOOGLE_API_KEY)
+     response = client.models.generate_content(
+        model="gemini-2.0-flash", contents="give me a haiku about cookies"
+    )
 
 
 
