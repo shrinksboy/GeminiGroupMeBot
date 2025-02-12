@@ -90,7 +90,7 @@ def process_message(v3_message):
         sender_id = v3_message.get("sender_id", "Unknown Sender ID")
 
         # Build a response based on the extracted information
-        response_text = f"Received message from {sender_name} (sender ID: {sender_id}) in group {group_id}: '{message_text}'"
+        # response_text = f"Received message from {sender_name} (sender ID: {sender_id}) in group {group_id}: '{message_text}'"
 
         # Add your custom logic here to process the message further.
         # For example, you could:
@@ -117,7 +117,7 @@ def process_message(v3_message):
             logger.error(f"Error sending message to GroupMe: {e}")
             return f"Error sending message to GroupMe: {e}"
 
-        return "Message sent to GroupMe."  # Can change to another success message
+        return "Message sent to GroupMe."  # success message
 
     except Exception as e:
         logger.error(f"Error processing message: {e}")
@@ -133,5 +133,4 @@ def health_check():
 
 
 if __name__ == '__main__':
-    # Don't use this in production.  Gunicorn will handle the serving.
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get("PORT", 8080)))
