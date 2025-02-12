@@ -17,6 +17,7 @@ GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")  # Get google api key from the
 GROUPME_API_URL = "https://api.groupme.com/v3/bots/post"  # GroupMe API endpoint
 
 client = genai.Client(api_key=GOOGLE_API_KEY)
+chatgroup_id = 96641973
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -110,9 +111,9 @@ def send_response(response_text):
 ##########################################
 
 def gemini_request(input_text):
-     chat = get_chat_session(group_id)
+     chat = get_chat_session(chatgroup_id)
      response = chat.send_message(input_text)
-     save_chat_session(group_id, chat)
+     save_chat_session(chatgroup_id, chat)
      return response.text
 
 def get_chat_session(chat_id):
