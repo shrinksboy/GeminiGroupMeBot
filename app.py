@@ -28,11 +28,14 @@
 ################################################################################################################################
 
 
+import http
 from flask import Flask, request, jsonify
 import logging
 import os
 
 app = Flask(__name__)
+
+GROUPME_API_URL = "https://api.groupme.com/v3/bots/post"
 
 # Configure logging (useful for debugging on GCP)
 logging.basicConfig(level=logging.INFO)
@@ -98,16 +101,16 @@ def process_message(v3_message):
 
         # Construct the payload for the GroupMe API
         payload = {
-            "bot_id": BOT_ID,
+            "bot_id": BOT_ID, # type: ignore
             "text": response_text
         }
 
         # Send the POST request to the GroupMe API
         try:
-            response = requests.post(https://api.groupme.com/v3/bots/post, json=payload)
+            response = request.post(GROUPME_API_URL, json=payload)
             response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
             logger.info(f"Successfully sent message to GroupMe. Status code: {response.status_code}")
-        except requests.exceptions.RequestException as e:
+        except request.exceptions.RequestException as e:
             logger.error(f"Error sending message to GroupMe: {e}")
             return f"Error sending message to GroupMe: {e}"
 
