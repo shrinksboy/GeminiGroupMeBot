@@ -33,7 +33,7 @@ steps:
 
 # Configure Cloud Build options
 options:
-  defaultLogsBucketBehavior: NONE
+  defaultLogsBucketBehavior: CLOUD_LOGGING_ONLY
   # You'll likely need to specify a service account. The Compute Engine
   # default service account is often used.  Enable the Cloud Build API,
   # as mentioned in one of the previous errors.
