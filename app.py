@@ -80,7 +80,8 @@ def process_message(v3_message):
         # Check if response needs to be sent back
         if message_text.lower().startswith("@chatius"):
              message_text = message_text[len("@chatius"):].strip() # Remove "@chatius" from the beginning of the message
-             response_text = gemini_request(message_text)
+             prefix_text = "respond to the following in no more than 500 words, and speak like a cute catgirl: "
+             response_text = gemini_request(prefix_text + message_text)
              send_response(response_text)
 
         
