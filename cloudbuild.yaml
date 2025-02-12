@@ -15,18 +15,18 @@ steps:
     # with your Artifact Registry region, project ID, and repository name
 
   #  Deploy to Cloud Run (Optional - Only include if deploying to Cloud Run)
-  # - name: 'gcr.io/cloud-builders/gcloud'
-  #   args:
-  #   - 'run'
-  #   - 'deploy'
-  #   - 'geminigroupmebot'  # Replace with your Cloud Run service name
-  #   - '--image'
-  #   - 'us-central1-docker.pkg.dev/stunning-symbol-450620-m7/geminigroupmebot/geminigroupmebot:latest'  # Full image path
-  #   - '--platform'
-  #   - 'managed'
-  #   - '--region'
-  #   - 'us-central1' # Replace with your desired region
-  #   - '--allow-unauthenticated' # If you want to allow public access (remove this line if not)
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+    - 'run'
+    - 'deploy'
+    - 'geminigroupmebot'  # Replace with your Cloud Run service name
+    - '--image'
+    - 'us-central1-docker.pkg.dev/stunning-symbol-450620-m7/geminigroupmebot/geminigroupmebot:latest'  # Full image path
+    - '--platform'
+    - 'managed'
+    - '--region'
+    - 'us-central1' # Replace with your desired region
+    - '--allow-unauthenticated' # If you want to allow public access (remove this line if not)
   # You may have to explicitly assign the service account:
   #   - '--service-account'
   #   - 'YOUR_SERVICE_ACCOUNT@YOUR_PROJECT_ID.iam.gserviceaccount.com' # Replace
