@@ -103,7 +103,7 @@ def process_message(v3_message):
 
         # Construct the payload for the GroupMe API
         payload = {
-            "bot_id": BOT_ID, # type: ignore
+            "bot_id": BOT_ID,
             "text": response_text
         }
 
@@ -112,7 +112,7 @@ def process_message(v3_message):
             response = request.post(GROUPME_API_URL, json=payload)
             response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
             logger.info(f"Successfully sent message to GroupMe. Status code: {response.status_code}")
-        except request.exceptions.RequestException as e:
+        except Exception as e:
             logger.error(f"Error sending message to GroupMe: {e}")
             return f"Error sending message to GroupMe: {e}"
 
