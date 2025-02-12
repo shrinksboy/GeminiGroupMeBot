@@ -74,7 +74,8 @@ def process_message(v3_message):
 
         # Check if response needs to be sent back
         if message_text.lower().startswith("@chatius"):
-             response_text = "Greetings human"
+             message_text = message_text[len("@chatius"):].strip() # Remove "@chatius" from the beginning of the message
+             response_text = gemini_request(message_text)
              send_response(response_text)
 
         
@@ -105,8 +106,9 @@ def send_response(response_text):
 def gemini_request(input_text):
      client = genai.Client(api_key=GOOGLE_API_KEY)
      response = client.models.generate_content(
-        model="gemini-2.0-flash", contents="give me a haiku about cookies"
+        model="gemini-2.0-flash", contents=input_text
     )
+     return response
 
 
 
