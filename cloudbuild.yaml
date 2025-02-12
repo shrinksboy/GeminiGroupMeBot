@@ -37,7 +37,7 @@ options:
   # You'll likely need to specify a service account. The Compute Engine
   # default service account is often used.  Enable the Cloud Build API,
   # as mentioned in one of the previous errors.
-  serviceAccount: '385396516979-compute@developer.gserviceaccount.com' #Replace the Project ID
+  # serviceAccount: '385396516979-compute@developer.gserviceaccount.com' #Replace the Project ID
   logging: NONE # Or NONE if you don't want logs stored in Cloud Storage
 
 images:
