@@ -90,7 +90,7 @@ def process_message(v3_message):
         sender_id = v3_message.get("sender_id", "Unknown Sender ID")
 
         # Build a response based on the extracted information
-        # response_text = f"Received message from {sender_name} (sender ID: {sender_id}) in group {group_id}: '{message_text}'"
+        response_text = ""
 
         # Add your custom logic here to process the message further.
         # For example, you could:
@@ -99,7 +99,7 @@ def process_message(v3_message):
         #   - Interact with other APIs.
 
         #Example action - if the text contains "test", return "test successful"
-        if "test" in message_text.lower():
+        if "bot-status-test" in message_text.lower():
             response_text = "Test successful"
 
         # Construct the payload for the GroupMe API
