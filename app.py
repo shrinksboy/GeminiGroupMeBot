@@ -6,7 +6,7 @@
 
 import os
 
-from google import genai
+# from google import genai
 
 from flask import Flask, request, jsonify
 
