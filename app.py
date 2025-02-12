@@ -1,7 +1,7 @@
 
 ################################################################################################################################
 
-#from google import genai
+from google import genai
 #from google import types
 import http
 from flask import Flask, request, jsonify
@@ -102,11 +102,11 @@ def send_response(response_text):
 
     return "Message sent to GroupMe."  # success message
 
-# def gemini_request(input_text):
-#      client = genai.Client(api_key=GOOGLE_API_KEY)
-#      response = client.models.generate_content(
-#         model="gemini-2.0-flash", contents="give me a haiku about cookies"
-#     )
+def gemini_request(input_text):
+     client = genai.Client(api_key=GOOGLE_API_KEY)
+     response = client.models.generate_content(
+        model="gemini-2.0-flash", contents="give me a haiku about cookies"
+    )
 
 
 
