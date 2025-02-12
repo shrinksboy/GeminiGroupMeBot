@@ -105,9 +105,8 @@ def send_response(response_text):
 
 def gemini_request(input_text):
      client = genai.Client(api_key=GOOGLE_API_KEY)
-     response = client.models.generate_content(
-        model="gemini-2.0-flash", contents=input_text
-    )
+     chat = client.chats.create(model="gemini-2.0-flash")
+     response = chat.send_message(input_text)
      return response.text
 
 
