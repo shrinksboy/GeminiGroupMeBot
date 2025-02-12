@@ -7,5 +7,7 @@ RUN pip3 install -r requirements.txt
 
 COPY . .
 
+ENV PORT 8080
+
 CMD ["python3", "app.py"]
 CMD gunicorn -b :$PORT main:app
