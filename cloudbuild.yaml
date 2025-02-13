@@ -46,14 +46,8 @@
  steps:
    # Build the Docker image.  Assumes a Dockerfile is in the root of your repository.
    - name: "gcr.io/cloud-builders/docker"
-     args:
-       [
-         "build",
-         "-t",
-         "us-central1-docker.pkg.dev/stunning-symbol-450620-m7/geminigroupmebot/geminigroupmebot-develop:latest",
-         ".",
-       ]
-        serviceAccount: "385396516979-compute@developer.gserviceaccount.com"
+     args: ["build", "-t", "us-central1-docker.pkg.dev/stunning-symbol-450620-m7/geminigroupmebot/geminigroupmebot-develop:latest", "." ]
+     serviceAccount: "385396516979-compute@developer.gserviceaccount.com"
    #  Replace 'us-central1', 'stunning-symbol-450620-m7', and 'geminigroupmebot'
    # with your Artifact Registry region, project ID, and repository name.
    # Also replace `geminigroupmebot` after the last slash to what you desire your service name to be.
