@@ -78,6 +78,10 @@ def process_message(v3_message):
         if "bot-status-test" in message_text.lower():
             send_response(response_text="Test Successful - (Development Branch)")
 
+        # Image test
+        if "bot-image-test" in message_text.lower():
+             send_response(response_text="Image Test", image_url="https://i.groupme.com/1080x1207.png.df1d226d38e741999f30fb06dffaaa4c")
+
 
         # Check if response needs to be sent back
         if message_text.lower().startswith("@chatius"):
@@ -92,14 +96,29 @@ def process_message(v3_message):
         return f"Error processing message: {e}"  # Return an error message to the webhook caller
     
     
-def send_response(response_text):
+def send_response(response_text, image_url):
     """
     Send POST response to groupme
     """
-    response_payload = {
+    
+    
+    if image_url is None:
+         response_payload = {
                   "bot_id": BOT_ID,
                 "text": response_text
              }
+    else:
+         response_payload = {
+                  "bot_id": BOT_ID,
+                "text": response_text,
+                "attachments": [
+                     {
+                          "type" : "image",
+                          "url" : image_url
+                     }
+                ]
+             }
+
     try:
             response = requests.post(GROUPME_API_URL, json=response_payload)
             response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
