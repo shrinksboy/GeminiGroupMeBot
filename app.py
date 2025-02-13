@@ -1,7 +1,6 @@
 #Jonah Casimir GroupMe Gemini Chatbot
 ################################################################################################################################
 
-# from tkinter import Image
 from google import genai
 from google.cloud import datastore
 import http
