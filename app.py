@@ -17,6 +17,7 @@ app = Flask(__name__)
 BOT_ID = os.environ.get("BOT_ID")  # Get Groupme bot ID from the environment
 GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")  # Get google api key from the environment
 GROUPME_API_URL = "https://api.groupme.com/v3/bots/post"  # GroupMe API endpoint
+IMAGE_SERVICE_URL = "https://image.groupme.com"
 GROUP_ADMIN_ID = os.environ.get("GROUP_ADMIN_ID") # Groupme sender_id that has admin rights
 
 client = genai.Client(api_key=GOOGLE_API_KEY)
@@ -225,7 +226,7 @@ def upload_image_to_groupme(image_bytes):
     """Uploads image bytes to the GroupMe Image Service and returns the URL."""
     try:
         files = {'file': image_bytes}  # The key "file" is required by the GroupMe API
-        response = requests.post("https://image.groupme.com", files=files)
+        response = requests.post(IMAGE_SERVICE_URL, files=files)
         response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
         data = response.json()
         return data.get("payload")  # The image URL is in the "payload" field
