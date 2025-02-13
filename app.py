@@ -74,6 +74,16 @@ def process_message(v3_message):
         message_text = v3_message.get("text", "")  # Get message text, default to empty string
         group_id = v3_message.get("group_id", "Unknown Group")
         sender_id = v3_message.get("sender_id", "Unknown Sender ID")
+        attachments = v3_message.get("attachments", [])
+
+        # Grab image url if there is one
+        image_url = None
+        if attachments:
+            for attachment in attachments:
+                if attachment.get("type") == "image":
+                    image_url = attachment.get("url")
+                    logger.info("Got image URL")
+                    break # break so other attachments are ignored
 
         # Status test
         if "bot-status-test" in message_text.lower():
@@ -97,12 +107,13 @@ def process_message(v3_message):
             send_response(response_text)
                  
 
-
-
         # Check if chatbot response needs to be sent back
         if message_text.lower().startswith("@chatius"):
+             
              message_text = message_text[len("@chatius"):].strip() # Remove "@chatius" from the beginning of the message
-             response_text = gemini_request(message_text)
+
+             image = load_image(image_url) if image_url else None
+             response_text = gemini_request(message_text, image)
              send_response(response_text)
 
         
@@ -129,7 +140,6 @@ def send_response(response_text, image_url=None):
     Send POST response to groupme
     """
 
-    
     if image_url is None: # Add Image to payload if one exists
          response_payload = {
                   "bot_id": BOT_ID,
