@@ -8,7 +8,7 @@ from flask import Flask, request, jsonify # type: ignore
 import logging
 import os
 import requests
-from PIL import Image
+from PIL import Image # type: ignore
 from io import BytesIO
 
 app = Flask(__name__)
@@ -25,12 +25,11 @@ chatgroup_id = 96641973
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-logger.info("Initialize logging for (develop branch)")
 logger.info("Initialize logging for (main branch)")
 
 # Initialize Cloud Datastore client
 datastore_client = datastore.Client()
-logger.info("Initialize datastore for (develop branch)")
+logger.info("Initialize datastore for (main branch)")
 
 @app.route('/', methods=['POST'])
 def webhook_handler():
@@ -89,7 +88,7 @@ def process_message(v3_message):
         # Status test
         if "bot-status-test" in message_text.lower():
             logger.info("BOT STATUS: GOOD")
-            send_response(response_text="Test Successful - (Development Branch)")
+            send_response(response_text="Test Successful - (Main Branch) - v2.0")
 
         #Admin Tests ######
         if sender_id is GROUP_ADMIN_ID:
