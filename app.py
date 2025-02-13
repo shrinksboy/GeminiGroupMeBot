@@ -1,6 +1,7 @@
 #Jonah Casimir GroupMe Gemini Chatbot
 ################################################################################################################################
 
+# from tkinter import Image
 from google import genai
 from google.cloud import datastore
 import http
@@ -8,6 +9,8 @@ from flask import Flask, request, jsonify # type: ignore
 import logging
 import os
 import requests
+from PIL import Image
+from io import BytesIO
 
 app = Flask(__name__)
 
@@ -15,6 +18,7 @@ app = Flask(__name__)
 BOT_ID = os.environ.get("BOT_ID")  # Get Groupme bot ID from the environment
 GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")  # Get google api key from the environment
 GROUPME_API_URL = "https://api.groupme.com/v3/bots/post"  # GroupMe API endpoint
+GROUP_ADMIN_ID = os.environ.get("GROUP_ADMIN_ID") # Groupme sender_id that has admin rights
 
 client = genai.Client(api_key=GOOGLE_API_KEY)
 chatgroup_id = 96641973
@@ -72,18 +76,26 @@ def process_message(v3_message):
         group_id = v3_message.get("group_id", "Unknown Group")
         sender_id = v3_message.get("sender_id", "Unknown Sender ID")
 
-        # Build a response based on the extracted information
-
         # Status test
         if "bot-status-test" in message_text.lower():
             send_response(response_text="Test Successful - (Development Branch)")
 
-        # Image test
-        if "bot-image-test" in message_text.lower():
-             send_response(response_text="Image Test", image_url="https://i.groupme.com/1080x1207.png.df1d226d38e741999f30fb06dffaaa4c.preview")
+        #Admin Tests ######
+        if sender_id is GROUP_ADMIN_ID:
+            # Image test
+            if "bot-image-test" in message_text.lower():
+                send_response(response_text="Image Test", image_url="https://i.groupme.com/630x630.jpeg.6772b62a25f94ac09169928658de6612")
+
+            # Image upload
+            if "bot-image-analyze-test" in message_text.lower():
+                 attachment_image = load_image("https://i.groupme.com/630x630.jpeg.6772b62a25f94ac09169928658de6612")
+                 response_text = gemini_request("analyze this image", attachment_image)
+                 send_response(response_text)
+                 
 
 
-        # Check if response needs to be sent back
+
+        # Check if chatbot response needs to be sent back
         if message_text.lower().startswith("@chatius"):
              message_text = message_text[len("@chatius"):].strip() # Remove "@chatius" from the beginning of the message
              response_text = gemini_request(message_text)
@@ -95,6 +107,18 @@ def process_message(v3_message):
         logger.error(f"Error processing message: {e}")
         return f"Error processing message: {e}"  # Return an error message to the webhook caller
     
+
+# Load image from URL to attach to message
+def load_image(image_url):
+     try:
+        response = requests.get(image_url, stream=True)
+        response.raise_for_status() # Raise HTTPError for bad responses (4xx or 5xx)
+        image = Image.open(BytesIO(response.content))
+        return image
+     except requests.exceptions.RequestException as e:
+        logger.error(f"Error loading image from URL: {e}")
+        return None
+     
     
 def send_response(response_text, image_url=None):
     """
@@ -131,11 +155,17 @@ def send_response(response_text, image_url=None):
 
 ##########################################
 
-def gemini_request(input_text):
+def gemini_request(input_text, image=None):
      client = genai.Client(api_key=GOOGLE_API_KEY)
-     response = client.models.generate_content(
-    model="gemini-2.0-flash", contents=input_text
-    )
+     if image is None:
+        response = client.models.generate_content(
+        model="gemini-2.0-flash", contents=input_text
+        )
+     else:
+         response = client.models.generate_content(
+        model="gemini-2.0-flash", contents=[input_text, image]
+        )
+     
      return response.text
 
 def get_chat_session(chat_id):
