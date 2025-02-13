@@ -80,7 +80,7 @@ def process_message(v3_message):
 
         # Image test
         if "bot-image-test" in message_text.lower():
-             send_response(response_text="Image Test", image_url="https://i.groupme.com/1080x1207.png.df1d226d38e741999f30fb06dffaaa4c")
+             send_response(response_text="Image Test", image_url="https://i.groupme.com/1080x1207.png.df1d226d38e741999f30fb06dffaaa4c.preview")
 
 
         # Check if response needs to be sent back
@@ -96,13 +96,13 @@ def process_message(v3_message):
         return f"Error processing message: {e}"  # Return an error message to the webhook caller
     
     
-def send_response(response_text, image_url):
+def send_response(response_text, image_url=None):
     """
     Send POST response to groupme
     """
+
     
-    
-    if image_url is None:
+    if image_url is None: # Add Image to payload if one exists
          response_payload = {
                   "bot_id": BOT_ID,
                 "text": response_text
