@@ -77,19 +77,24 @@ def process_message(v3_message):
 
         # Status test
         if "bot-status-test" in message_text.lower():
+            logger.info("BOT STATUS: GOOD")
             send_response(response_text="Test Successful - (Development Branch)")
 
         #Admin Tests ######
         if sender_id is GROUP_ADMIN_ID:
+            logger.info("Message from ADMIN")
+
             # Image test
-            if "bot-image-test" in message_text.lower():
-                send_response(response_text="Image Test", image_url="https://i.groupme.com/630x630.jpeg.6772b62a25f94ac09169928658de6612")
+        if "bot-image-test" in message_text.lower():
+            logger.info("Image Sending Test")
+            send_response(response_text="Image Test", image_url="https://i.groupme.com/630x630.jpeg.6772b62a25f94ac09169928658de6612")
 
             # Image upload
-            if "bot-image-analyze-test" in message_text.lower():
-                 attachment_image = load_image("https://i.groupme.com/630x630.jpeg.6772b62a25f94ac09169928658de6612")
-                 response_text = gemini_request("analyze this image", attachment_image)
-                 send_response(response_text)
+        if "bot-image-analyze-test" in message_text.lower():
+            logger.info("Image analyzer test")
+            attachment_image = load_image("https://i.groupme.com/630x630.jpeg.6772b62a25f94ac09169928658de6612")
+            response_text = gemini_request("analyze this image", attachment_image)
+            send_response(response_text)
                  
 
 
