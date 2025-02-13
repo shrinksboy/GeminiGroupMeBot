@@ -74,7 +74,7 @@ def process_message(v3_message):
 
         # Status test
         if "bot-status-test" in message_text.lower():
-            send_response(response_text="Test Successful (Development Branch)")
+            send_response(response_text="Test Successful - (Development Branch)")
 
 
         # Check if response needs to be sent back
