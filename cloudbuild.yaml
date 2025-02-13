@@ -1,14 +1,16 @@
+# cloudbuild.yaml
+
 steps:
   # Build the Docker image.  Assumes a Dockerfile is in the root of your repository.
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'us-central1-docker.pkg.dev/stunning-symbol-450620-m7/geminigroupmebot/geminigroupmebot-develop:latest', '.']
+    args: ['build', '-t', 'us-central1-docker.pkg.dev/stunning-symbol-450620-m7/geminigroupmebot/geminigroupmebot:latest', '.']
     #  Replace 'us-central1', 'stunning-symbol-450620-m7', and 'geminigroupmebot'
     # with your Artifact Registry region, project ID, and repository name.
     # Also replace `geminigroupmebot` after the last slash to what you desire your service name to be.
 
   # Push the Docker image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'us-central1-docker.pkg.dev/stunning-symbol-450620-m7/geminigroupmebot/geminigroupmebot-develop:latest']
+    args: ['push', 'us-central1-docker.pkg.dev/stunning-symbol-450620-m7/geminigroupmebot/geminigroupmebot:latest']
     #  Replace 'us-central1', 'stunning-symbol-450620-m7', and 'geminigroupmebot'
     # with your Artifact Registry region, project ID, and repository name
 
@@ -17,9 +19,9 @@ steps:
     args:
     - 'run'
     - 'deploy'
-    - 'geminigroupmebot-develop'  # Replace with your Cloud Run service name
+    - 'geminigroupmebot'  # Replace with your Cloud Run service name
     - '--image'
-    - 'us-central1-docker.pkg.dev/stunning-symbol-450620-m7/geminigroupmebot/geminigroupmebot-develop:latest'  # Full image path
+    - 'us-central1-docker.pkg.dev/stunning-symbol-450620-m7/geminigroupmebot/geminigroupmebot:latest'  # Full image path
     - '--platform'
     - 'managed'
     - '--region'
@@ -35,9 +37,8 @@ options:
   # You'll likely need to specify a service account. The Compute Engine
   # default service account is often used.  Enable the Cloud Build API,
   # as mentioned in one of the previous errors.
-  serviceAccount: 'YOUR_PROJECT_ID-compute@developer.gserviceaccount.com' #Replace the Project ID
-#  logging: CLOUD_LOGGING_ONLY # Or NONE if you don't want logs stored in Cloud Storage
+  # serviceAccount: '385396516979-compute@developer.gserviceaccount.com' #Replace the Project ID
+  logging: CLOUD_LOGGING_ONLY # Or NONE if you don't want logs stored in Cloud Storage
 
 images:
-  - 'us-central1-docker.pkg.dev/stunning-symbol-450620-m7/geminigroupmebot/geminigroupmebot-develop:latest' # Make sure this matches your image name
-```
+  - 'us-central1-docker.pkg.dev/stunning-symbol-450620-m7/geminigroupmebot/geminigroupmebot:latest' # Make sure this matches your image name

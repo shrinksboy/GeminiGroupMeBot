@@ -60,7 +60,7 @@ def webhook_handler():
 
 def process_message(v3_message):
     """
-    Processes the V3 message (GroupMe message) and generates a response.
+    Process the V3 message (GroupMe message) and generate a response.
     """
 
     try:
