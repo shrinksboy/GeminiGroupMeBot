@@ -40,4 +40,3 @@ options:
 
 images:
   - 'us-central1-docker.pkg.dev/stunning-symbol-450620-m7/geminigroupmebot/geminigroupmebot-develop:latest' # Make sure this matches your image name
-```
