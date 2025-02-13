@@ -89,7 +89,7 @@ def process_message(v3_message):
         if "bot-status-test" in message_text.lower():
             logger.info("BOT STATUS: GOOD")
             logger.info("sender_id " + sender_id)
-            send_response(response_text="Test Successful - (Development Branch)")
+            send_response(response_text="Test Successful - (Development Branch) - v2.5")
             
         #Admin Tests ######
         if sender_id is GROUP_ADMIN_ID:
@@ -225,7 +225,7 @@ def upload_image_to_groupme(image_bytes):
     """Uploads image bytes to the GroupMe Image Service and returns the URL."""
     try:
         files = {'file': image_bytes}  # The key "file" is required by the GroupMe API
-        response = requests.post(https://image.groupme.com, files=files)
+        response = requests.post("https://image.groupme.com", files=files)
         response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
         data = response.json()
         return data.get("payload")  # The image URL is in the "payload" field
