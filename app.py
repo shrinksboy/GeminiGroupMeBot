@@ -8,7 +8,7 @@ from flask import Flask, request, jsonify # type: ignore
 import logging
 import os
 import requests
-from PIL import Image
+from PIL import Image # type: ignore
 from io import BytesIO
 
 app = Flask(__name__)
@@ -88,8 +88,9 @@ def process_message(v3_message):
         # Status test
         if "bot-status-test" in message_text.lower():
             logger.info("BOT STATUS: GOOD")
+            logger.info("sender_id " + sender_id)
             send_response(response_text="Test Successful - (Development Branch)")
-
+            
         #Admin Tests ######
         if sender_id is GROUP_ADMIN_ID:
             logger.info("Message from ADMIN")
@@ -113,7 +114,10 @@ def process_message(v3_message):
              message_text = message_text[len("@chatius"):].strip() # Remove "@chatius" from the beginning of the message
 
              image = load_image(image_url) if image_url else None
-             response_text = gemini_request(message_text, image)
+
+             prefix_text = ""
+
+             response_text = gemini_request(prefix_text + message_text, image)
              send_response(response_text)
 
         
