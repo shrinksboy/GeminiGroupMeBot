@@ -4,7 +4,7 @@
 from google import genai
 from google.cloud import datastore
 import http
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify # type: ignore
 import logging
 import os
 import requests
@@ -26,6 +26,7 @@ logger.info("Initialize logging for (develop branch)")
 
 # Initialize Cloud Datastore client
 datastore_client = datastore.Client()
+logger.info("Initialize datastore for (develop branch)")
 
 @app.route('/', methods=['POST'])
 def webhook_handler():
