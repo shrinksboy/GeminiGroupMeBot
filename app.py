@@ -22,6 +22,7 @@ chatgroup_id = 96641973
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+logger.info("Initialize logging for (develop branch)")
 
 # Initialize Cloud Datastore client
 datastore_client = datastore.Client()
