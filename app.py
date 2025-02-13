@@ -109,7 +109,15 @@ def process_message(v3_message):
                  
 
         # Check if chatbot response needs to be sent back
-        if message_text.lower().startswith("@chatius"):
+        if message_text.lower().startswith("@chatius-art"):
+            message_text = message_text[len("@chatius-art"):].strip() # Remove "@chatius-art" from the beginning of the message
+
+            generated_image_url = imagen_request(message_text)
+            response_text = "Here's your image, human"
+
+            send_response(response_text, generated_image_url)
+
+        elif message_text.lower().startswith("@chatius"):
              
              message_text = message_text[len("@chatius"):].strip() # Remove "@chatius" from the beginning of the message
 
@@ -174,6 +182,9 @@ def send_response(response_text, image_url=None):
 ##########################################
 
 def gemini_request(input_text, image=None):
+     """
+     Sends text and possible attached image to gemini api and returns text response
+     """
      client = genai.Client(api_key=GOOGLE_API_KEY)
      if image is None:
         response = client.models.generate_content(
@@ -186,8 +197,46 @@ def gemini_request(input_text, image=None):
      
      return response.text
 
+def imagen_request(input_text):
+    """
+     Sends text to imagen api and returns image url response
+    """
+    response = client.models.generate_images(
+        model='imagen-3.0-generate-002',
+        prompt= input_text 
+    )
+    for generated_image in response.generated_images:
+        image = Image.open(BytesIO(generated_image.image.image_bytes))
+        
+    gen_image_url = upload_image_to_groupme(image_to_bytes(image))
+    return gen_image_url
+
+    
+##########################################
+
+def image_to_bytes(image):
+    """Converts a PIL Image object to bytes."""
+    img_byte_arr = BytesIO()
+    image.save(img_byte_arr, format='JPEG')  # You can change the format here (e.g., PNG)
+    img_byte_arr = img_byte_arr.getvalue()
+    return img_byte_arr
+
+def upload_image_to_groupme(image_bytes):
+    """Uploads image bytes to the GroupMe Image Service and returns the URL."""
+    try:
+        files = {'file': image_bytes}  # The key "file" is required by the GroupMe API
+        response = requests.post(https://image.groupme.com, files=files)
+        response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
+        data = response.json()
+        return data.get("payload")  # The image URL is in the "payload" field
+    except requests.exceptions.RequestException as e:
+        print(f"Error uploading image to GroupMe: {e}")
+        return None
+
 def get_chat_session(chat_id):
-    """Retrieves chat session from Cloud Datastore."""
+    """
+    Retrieves chat session from Cloud Datastore.
+    """
     key = datastore_client.key("ChatSession", chat_id)
     entity = datastore_client.get(key)
     if entity is None:
