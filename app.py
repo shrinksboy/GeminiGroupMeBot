@@ -22,6 +22,7 @@ chatgroup_id = 96641973
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+logger.info("Initialize logging for (main branch)")
 
 # Initialize Cloud Datastore client
 datastore_client = datastore.Client()
@@ -80,7 +81,7 @@ def process_message(v3_message):
         # Check if response needs to be sent back
         if message_text.lower().startswith("@chatius"):
              message_text = message_text[len("@chatius"):].strip() # Remove "@chatius" from the beginning of the message
-             prefix_text = "respond to the following in no more than 300 words, and speak like a member of the roman senate: "
+             prefix_text = "respond to the following concisely: "
              response_text = gemini_request(prefix_text + message_text)
              send_response(response_text)
 
