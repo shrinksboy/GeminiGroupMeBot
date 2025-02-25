@@ -41,10 +41,10 @@ firebase_admin.initialize_app(cred, {
 db = firestore.client()
 
 # Create data
-doc_ref = db.collection("logs").document("chatius")
+doc_ref = db.collection("logs").document("test")
 doc_ref.set({
     "timestamp": "NOW()",
-    "message": "Hello world"
+    "message": "Testing testing"
 })
 
 
