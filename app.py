@@ -10,6 +10,9 @@ import os
 import requests
 from PIL import Image # type: ignore
 from io import BytesIO
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import firestore
 
 app = Flask(__name__)
 
@@ -28,9 +31,22 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 logger.info("Initialize logging for (develop branch)")
 
-# Initialize Cloud Datastore client
-datastore_client = datastore.Client()
+# Initialize Cloud Firestore client
 logger.info("Initialize datastore for (develop branch)")
+cred = credentials.ApplicationDefault()
+firebase_admin.initialize_app(cred, {
+    'projectId': "stunning-symbol-450620-m7",
+})
+
+db = firestore.client()
+
+# Create data
+doc_ref = db.collection("logs").document("chatius")
+doc_ref.set({
+    "timestamp": "NOW()",
+    "message": "Hello world"
+})
+
 
 @app.route('/', methods=['POST'])
 def webhook_handler():
@@ -233,34 +249,6 @@ def upload_image_to_groupme(image_bytes):
     except requests.exceptions.RequestException as e:
         print(f"Error uploading image to GroupMe: {e}")
         return None
-
-def get_chat_session(chat_id):
-    """
-    Retrieves chat session from Cloud Datastore.
-    """
-    key = datastore_client.key("ChatSession", chat_id)
-    entity = datastore_client.get(key)
-    if entity is None:
-        # Create a new chat session if it doesn't exist
-        model = genai.GenerativeModel('gemini-pro')
-        chat = model.start_chat()
-        entity = datastore.Entity(key=key)
-        entity["session"] = chat.get_history()  # Store initial chat history
-        datastore_client.put(entity)
-        return chat
-    else:
-        model = genai.GenerativeModel('gemini-pro')
-        chat = model.start_chat(history = entity["session"])
-        # Load History
-
-        return chat
-    
-def save_chat_session(chat_id, chat):
-    """Saves the chat history to Cloud Datastore."""
-    key = datastore_client.key("ChatSession", chat_id)
-    entity = datastore.Entity(key=key)
-    entity["session"] = chat.get_history()
-    datastore_client.put(entity)
 
 
 @app.route('/health', methods=['GET'])
