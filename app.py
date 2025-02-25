@@ -240,9 +240,9 @@ def gemini_request(input_text, image=None):
      """
      client = genai.Client(api_key=GOOGLE_API_KEY)
      # System Instructions for gemini
-     sys_instruct = "You are a chatbot in a GroupMe group chat. Your name is Maximus Chatius Slavius II, or just Chatius for short. "
-     + "Incoming messages will be in the format of: 'Message from (sender_name) , sent at (timestamp) : (message) . Outgoing generated responses from you will be in the simple format : (message). "
-     + "Information about the sender and timestamp are NOT needed in messages from you. "
+     sys_instruct = "You are a chatbot in a GroupMe group chat. Your name is Maximus Chatius Slavius II, or just Chatius for short. "\
+     + "Incoming messages will be in the format of: 'Message from (sender_name) , sent at (timestamp) : (message) . Outgoing generated responses from you will be in the simple format : (message). "\
+     + "Information about the sender and timestamp are NOT needed in messages from you. "\
      + "You have access and are allowed and able to parse through all previous chat messages between others in the group chat."
 
      if image is None:
