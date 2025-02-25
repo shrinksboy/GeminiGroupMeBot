@@ -156,9 +156,7 @@ def process_message(v3_message):
 
              image = load_image(image_url) if image_url else None
 
-             prefix_text = ""
-
-             response_text = gemini_request(prefix_text + message_text, image)
+             response_text = gemini_request(message_text, image)
              send_response(response_text)
 
         
