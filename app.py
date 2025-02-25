@@ -2,6 +2,7 @@
 ################################################################################################################################
 
 import datetime
+import types
 from google import genai
 from google.cloud import datastore
 import http
@@ -218,10 +219,18 @@ def gemini_request(input_text, image=None):
      Sends text and possible attached image to gemini api and returns text response
      """
      client = genai.Client(api_key=GOOGLE_API_KEY)
+     # System Instructions for gemini
+     sys_instruct = "You are a chatbot in a GroupMe group chat. Your name is Chatius."
+
      if image is None:
-        response = client.models.generate_content(
-        model="gemini-2.0-flash", contents=input_text
-        )
+         chat = client.chats.create(model="gemini-2.0-flash",
+                                    config=types.GenerateContentConfig(system_instruction=sys_instruct),
+                                    history=get_chat_history_from_firestore)
+         response = chat.send_message(input_text)
+
+        # response = client.models.generate_content(
+        # model="gemini-2.0-flash", contents=input_text
+        # )
      else:
         response = client.models.generate_content(
         model="gemini-2.0-flash", contents=[input_text, image]
@@ -276,6 +285,45 @@ def upload_image_to_groupme(image_bytes):
     except requests.exceptions.RequestException as e:
         print(f"Error uploading image to GroupMe: {e}")
         return None
+    
+
+def get_chat_history_from_firestore(group_id):
+    """Retrieves the entire chat history from Firestore for a given group and formats it for Gemini."""
+    chat_history = []
+    try:
+        # Reference to the "dev-logs" collection
+        messages_ref = db.collection("dev-logs")
+
+        # Retrieve all documents in the "dev-logs" collection, ordered by timestamp
+        docs = messages_ref.order_by("timestamp").get()
+
+        # Iterate over the documents and append them to the history list
+        for doc in docs:
+            message_data = doc.to_dict()
+            message = message_data.get("message", "")
+            sender_type = message_data.get("sender type", "")
+            sender_name = message_data.get("sender name", "Unknown")
+
+            # Determine the role based on sender type
+            if sender_type == "user":
+                role = "user"
+            elif sender_type == "bot":
+                role = "model" # Use model role for bot responses. In this case, what does the bot do?
+            else:
+                print(f"Warning: Unknown sender type '{sender_type}' in document {doc.id}. Assuming 'user' role.")
+                role = "user"  # or you can skip this document
+
+            # Format each entry to contain name, message, and whether the sender is a bot
+            formatted_data = {
+            f"The sender name is {sender_name} and the message is {message}",
+            role,
+            }
+
+            chat_history.append(formatted_data)
+
+    except Exception as e:
+        print(f"Error retrieving chat history from Firestore: {e}")
+    return chat_history
 
 
 @app.route('/health', methods=['GET'])
