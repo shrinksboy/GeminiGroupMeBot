@@ -11,3 +11,4 @@ grpcio==1.59.0
 Pillow
 google-cloud-firestore
 firebase-admin
+google.ai.generativelanguage

@@ -3,6 +3,7 @@
 
 import datetime
 from google.genai.types import GenerateContentConfig, HttpOptions
+from google.genai.types import Content, HttpOptions, Part
 from google import genai
 from google.cloud import datastore
 import http
@@ -212,6 +213,26 @@ def send_response(response_text, image_url=None):
 
 ##########################################
 
+# Define safety settings
+safety_settings = [
+    {
+        "category": "HARM_CATEGORY_HARASSMENT",
+        "threshold": "BLOCK_LOW_AND_ABOVE" #Or use: "BLOCK_NONE", "BLOCK_ONLY_HIGH", "BLOCK_MEDIUM_AND_ABOVE", "BLOCK_LOW_AND_ABOVE"
+    },
+    {
+        "category": "HARM_CATEGORY_HATE_SPEECH",
+        "threshold": "BLOCK_LOW_AND_ABOVE"
+    },
+    {
+        "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+        "threshold": "BLOCK_LOW_AND_ABOVE"
+    },
+    {
+        "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+        "threshold": "BLOCK_LOW_AND_ABOVE"
+    }
+]
+
 def gemini_request(input_text, image=None):
      """
      Sends text and possible attached image to gemini api and returns text response
@@ -222,7 +243,7 @@ def gemini_request(input_text, image=None):
 
      if image is None:
          chat = client.chats.create(model="gemini-2.0-flash",
-                                    # config=GenerateContentConfig(system_instruction=sys_instruct),
+                                    config=GenerateContentConfig(system_instruction=sys_instruct),
                                     history=get_chat_history_from_firestore)
          response = chat.send_message(input_text)
 
@@ -301,6 +322,7 @@ def get_chat_history_from_firestore(group_id):
             message = message_data.get("message", "")
             sender_type = message_data.get("sender type", "")
             sender_name = message_data.get("sender name", "Unknown")
+            timestamp = message_data.get("timestamp")
 
             # Determine the role based on sender type
             if sender_type == "user":
@@ -311,11 +333,9 @@ def get_chat_history_from_firestore(group_id):
                 role = "user"  # or you can skip this document
 
             # Format each entry to contain name, message, and whether the sender is a bot
-            formatted_data = {
-            f"The sender name is {sender_name} and the message is {message}",
-            role,
-            }
-
+            formatted_data = Content(
+                                    parts=[Part(text=f"Message from {sender_name} , sent at {timestamp} : {message}")],
+                                    role=role)
             chat_history.append(formatted_data)
 
     except Exception as e:
