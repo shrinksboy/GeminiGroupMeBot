@@ -222,7 +222,7 @@ def gemini_request(input_text, image=None):
 
      if image is None:
          chat = client.chats.create(model="gemini-2.0-flash",
-                                    config=GenerateContentConfig(system_instruction=sys_instruct),
+                                    # config=GenerateContentConfig(system_instruction=sys_instruct),
                                     history=get_chat_history_from_firestore)
          response = chat.send_message(input_text)
 
@@ -308,7 +308,6 @@ def get_chat_history_from_firestore(group_id):
             elif sender_type == "bot":
                 role = "model" # Use model role for bot responses. In this case, what does the bot do?
             else:
-                print(f"Warning: Unknown sender type '{sender_type}' in document {doc.id}. Assuming 'user' role.")
                 role = "user"  # or you can skip this document
 
             # Format each entry to contain name, message, and whether the sender is a bot
