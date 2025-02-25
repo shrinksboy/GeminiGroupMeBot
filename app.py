@@ -1,6 +1,7 @@
 #Jonah Casimir GroupMe Gemini Chatbot
 ################################################################################################################################
 
+import datetime
 from google import genai
 from google.cloud import datastore
 import http
@@ -87,10 +88,13 @@ def process_message(v3_message):
 
     try:
         # Extract relevant information from the message
+        message_id = v3_message.get("id") # get id of v3 message
         sender_name = v3_message.get("name", "Unknown Sender")  # Get sender name, default to "Unknown Sender"
         message_text = v3_message.get("text", "")  # Get message text, default to empty string
         group_id = v3_message.get("group_id", "Unknown Group")
         sender_id = v3_message.get("sender_id", "Unknown Sender ID")
+        sender_type = v3_message.get("sender_type")
+        message_timestamp = convert_timestamp(v3_message.get("created_at")) # get timestamp and convert from epoch time
         attachments = v3_message.get("attachments", [])
 
         # Grab image url if there is one
@@ -109,7 +113,7 @@ def process_message(v3_message):
             send_response(response_text="Test Successful - (Development Branch) - v2.5")
             
         #Admin Tests ######
-        if sender_id is GROUP_ADMIN_ID:
+        if sender_id == GROUP_ADMIN_ID:
             logger.info("Message from ADMIN")
 
             # Image test
@@ -123,6 +127,17 @@ def process_message(v3_message):
             attachment_image = load_image("https://i.groupme.com/630x630.jpeg.6772b62a25f94ac09169928658de6612")
             response_text = gemini_request("analyze this image", attachment_image)
             send_response(response_text)
+
+
+        # Add message to database
+        doc_ref = db.collection("dev-logs").document(message_id)
+        doc_ref.set({
+            "timestamp": "{message_timestamp}",
+            "sender ID": sender_id,
+            "sender name": sender_name,
+            "sender type": sender_type,
+            "message": message_text
+        })
                  
 
         # Check if chatbot response needs to be sent back
@@ -230,6 +245,16 @@ def imagen_request(input_text):
 
     
 ##########################################
+
+def convert_timestamp(timestamp):
+    """Converts a Unix timestamp to a datetime object."""
+    try:
+        # Convert the timestamp to a datetime object (in UTC)
+        datetime_object = datetime.datetime.utcfromtimestamp(timestamp)
+        return datetime_object
+    except Exception as e:
+        print(f"Error converting timestamp: {e}")
+        return None
 
 def image_to_bytes(image):
     """Converts a PIL Image object to bytes."""
