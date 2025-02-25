@@ -240,9 +240,7 @@ def gemini_request(input_text, image=None):
      """
      client = genai.Client(api_key=GOOGLE_API_KEY)
      # System Instructions for gemini
-     sys_instruct = "You are a chatbot in a GroupMe group chat. Your name is Chatius. "
-     + "Messages will be sent in the format of: 'Message from (sender_name) , sent at (timestamp) : (message) . "
-     + "Respond with just the format of: '(response)' "
+     sys_instruct = "You are a chatbot in a GroupMe group chat. Your name is Chatius. Messages will be sent in the format of: 'Message from (sender_name) , sent at (timestamp) : (message) . Respond with just the format of: '(response)' "
 
      if image is None:
          chat = client.chats.create(model="gemini-2.0-flash",
