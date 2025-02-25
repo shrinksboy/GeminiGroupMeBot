@@ -2,7 +2,7 @@
 ################################################################################################################################
 
 import datetime
-import types
+from google.genai.types import GenerateContentConfig, HttpOptions
 from google import genai
 from google.cloud import datastore
 import http
@@ -224,7 +224,7 @@ def gemini_request(input_text, image=None):
 
      if image is None:
          chat = client.chats.create(model="gemini-2.0-flash",
-                                    config=types.GenerateContentConfig(system_instruction=sys_instruct),
+                                    config=GenerateContentConfig(system_instruction=sys_instruct),
                                     history=get_chat_history_from_firestore)
          response = chat.send_message(input_text)
 
