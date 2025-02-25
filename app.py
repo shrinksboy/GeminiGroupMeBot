@@ -143,21 +143,22 @@ def process_message(v3_message):
                  
 
         # Check if chatbot response needs to be sent back
-        if message_text.lower().startswith("@chatius-art"):
-            message_text = message_text[len("@chatius-art"):].strip() # Remove "@chatius-art" from the beginning of the message
+        # if message_text.lower().startswith("@chatius-art"):
+        #     message_text = message_text[len("@chatius-art"):].strip() # Remove "@chatius-art" from the beginning of the message
 
-            generated_image_url = imagen_request(message_text)
-            response_text = "Here's your image, human"
+        #     generated_image_url = imagen_request(message_text)
+        #     response_text = "Here's your image, human"
 
-            send_response(response_text, generated_image_url)
+        #     send_response(response_text, generated_image_url)
 
-        elif message_text.lower().startswith("@chatius"):
+        if message_text.lower().startswith("@chatius"):
              
              message_text = message_text[len("@chatius"):].strip() # Remove "@chatius" from the beginning of the message
 
              image = load_image(image_url) if image_url else None
 
              response_text = gemini_request(message_text, image)
+
              send_response(response_text)
 
         
@@ -243,8 +244,8 @@ def gemini_request(input_text, image=None):
 
      if image is None:
          chat = client.chats.create(model="gemini-2.0-flash",
-                                    config=GenerateContentConfig(system_instruction=sys_instruct),
-                                    history=get_chat_history_from_firestore)
+                                    history=get_chat_history_from_firestore("dev-logs"),
+                                    config=GenerateContentConfig(system_instruction=sys_instruct))
          response = chat.send_message(input_text)
 
         # response = client.models.generate_content(
@@ -306,14 +307,14 @@ def upload_image_to_groupme(image_bytes):
         return None
     
 
-def get_chat_history_from_firestore(group_id):
+def get_chat_history_from_firestore(collection_name):
     """Retrieves the entire chat history from Firestore for a given group and formats it for Gemini."""
     chat_history = []
     try:
-        # Reference to the "dev-logs" collection
-        messages_ref = db.collection("dev-logs")
+        # Reference to the collection
+        messages_ref = db.collection(collection_name)
 
-        # Retrieve all documents in the "dev-logs" collection, ordered by timestamp
+        # Retrieve all documents in the collection, ordered by timestamp
         docs = messages_ref.order_by("timestamp").get()
 
         # Iterate over the documents and append them to the history list
