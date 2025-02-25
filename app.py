@@ -132,7 +132,7 @@ def process_message(v3_message):
         # Add message to database
         doc_ref = db.collection("dev-logs").document(message_id)
         doc_ref.set({
-            "timestamp": "{message_timestamp}",
+            "timestamp": message_timestamp,
             "sender ID": sender_id,
             "sender name": sender_name,
             "sender type": sender_type,
@@ -223,7 +223,7 @@ def gemini_request(input_text, image=None):
         model="gemini-2.0-flash", contents=input_text
         )
      else:
-         response = client.models.generate_content(
+        response = client.models.generate_content(
         model="gemini-2.0-flash", contents=[input_text, image]
         )
      
@@ -251,7 +251,9 @@ def convert_timestamp(timestamp):
     try:
         # Convert the timestamp to a datetime object (in UTC)
         datetime_object = datetime.datetime.utcfromtimestamp(timestamp)
-        return datetime_object
+        # Format the datetime object as a string
+        formatted_datetime = datetime_object.strftime("%Y-%m-%d %H:%M:%S UTC")
+        return formatted_datetime
     except Exception as e:
         print(f"Error converting timestamp: {e}")
         return None
