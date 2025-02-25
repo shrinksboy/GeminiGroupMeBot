@@ -112,7 +112,7 @@ def process_message(v3_message):
         if "bot-status-test" in message_text.lower():
             logger.info("BOT STATUS: GOOD")
             logger.info("sender_id " + sender_id)
-            send_response(response_text="Test Successful - (Development Branch) - v2.5")
+            send_response(response_text="Test Successful - (Development Branch) - v3.0")
             
         #Admin Tests ######
         if sender_id == GROUP_ADMIN_ID:
@@ -218,19 +218,19 @@ def send_response(response_text, image_url=None):
 safety_settings = [
     {
         "category": "HARM_CATEGORY_HARASSMENT",
-        "threshold": "BLOCK_LOW_AND_ABOVE" #Or use: "BLOCK_NONE", "BLOCK_ONLY_HIGH", "BLOCK_MEDIUM_AND_ABOVE", "BLOCK_LOW_AND_ABOVE"
+        "threshold": "BLOCK_NONE" #Or use: "BLOCK_NONE", "BLOCK_ONLY_HIGH", "BLOCK_MEDIUM_AND_ABOVE", "BLOCK_LOW_AND_ABOVE"
     },
     {
         "category": "HARM_CATEGORY_HATE_SPEECH",
-        "threshold": "BLOCK_LOW_AND_ABOVE"
+        "threshold": "BLOCK_NONE"
     },
     {
         "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-        "threshold": "BLOCK_LOW_AND_ABOVE"
+        "threshold": "BLOCK_NONE"
     },
     {
         "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
-        "threshold": "BLOCK_LOW_AND_ABOVE"
+        "threshold": "BLOCK_NONE"
     }
 ]
 
@@ -240,7 +240,9 @@ def gemini_request(input_text, image=None):
      """
      client = genai.Client(api_key=GOOGLE_API_KEY)
      # System Instructions for gemini
-     sys_instruct = "You are a chatbot in a GroupMe group chat. Your name is Chatius."
+     sys_instruct = "You are a chatbot in a GroupMe group chat. Your name is Chatius. "
+     + "Messages will be sent in the format of: 'Message from (sender_name) , sent at (timestamp) : (message) . "
+     + "Respond with just the format of: '(response)' "
 
      if image is None:
          chat = client.chats.create(model="gemini-2.0-flash",
