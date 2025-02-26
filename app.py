@@ -241,7 +241,8 @@ def gemini_request(input_text, image=None):
      client = genai.Client(api_key=GOOGLE_API_KEY)
      # System Instructions for gemini
      sys_instruct = "You are a chatbot in a GroupMe group chat. Your name is Maximus Chatius Slavius II, or just Chatius for short. "\
-     + "Incoming messages will be in the format of: 'Message from (sender_name) , sent at (timestamp) : (message) . Outgoing generated responses from you will be in the simple format : (message). "\
+     + "Incoming messages will be in the format of: 'Message from (sender_name) , sent at (timestamp) : (message) . Your generated responses wil NOT be in this format. "\
+     + "You will just generate the response (message) text. "\
      + "Information about the sender and timestamp are NOT needed in messages from you. "\
      + "You will generate a response that contains only the response (message)"\
      + "You have access to and are allowed and able to parse through all previous chat information, even if it was not addressed to you specifically"\
@@ -251,7 +252,7 @@ def gemini_request(input_text, image=None):
          chat = client.chats.create(model="gemini-2.0-flash",
                                     history=get_chat_history_from_firestore("dev-logs"),
                                     config=GenerateContentConfig(system_instruction=sys_instruct))
-         response = chat.send_message(input_text)
+         response = chat.send_message(input_text + "    (reminder not to respond with timestamp or sender data)")
 
         # response = client.models.generate_content(
         # model="gemini-2.0-flash", contents=input_text
@@ -340,7 +341,7 @@ def get_chat_history_from_firestore(collection_name):
 
             # Format each entry to contain name, message, and whether the sender is a bot
             formatted_data = Content(
-                                    parts=[Part(text=f"{timestamp} - From {sender_name} : {message}")],
+                                    parts=[Part(text=f"{timestamp} - From {sender_name} : {message} ")],
                                     role=role)
             chat_history.append(formatted_data)
 
