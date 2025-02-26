@@ -2,6 +2,7 @@
 ################################################################################################################################
 
 import datetime
+from google.genai.types import Content, Part, GenerateContentConfig
 from google.genai import types
 from google import genai
 from google.cloud import datastore
@@ -262,7 +263,7 @@ def gemini_request(input_text, image=None):
                                         # safety_settings=safety_settings
                                         )
                                     )
-         response = chat.send_message(input_text + "    (reminder not to respond with timestamp or sender data)")
+         response = chat.send_message(input_text + "")
 
         # response = client.models.generate_content(
         # model="gemini-2.0-flash", contents=input_text
