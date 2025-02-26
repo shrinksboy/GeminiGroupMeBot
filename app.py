@@ -297,7 +297,7 @@ def extract_text_after_regex_prefix(text, known_prefix):
     match = re.search(pattern, text)
     if match:
         return match.group(1).strip()  # Return the captured text after the known prefix and strip whitespace
-    return None
+    return text
 
 def imagen_request(input_text):
     """
