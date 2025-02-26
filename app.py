@@ -243,7 +243,9 @@ def gemini_request(input_text, image=None):
      sys_instruct = "You are a chatbot in a GroupMe group chat. Your name is Maximus Chatius Slavius II, or just Chatius for short. "\
      + "Incoming messages will be in the format of: 'Message from (sender_name) , sent at (timestamp) : (message) . Outgoing generated responses from you will be in the simple format : (message). "\
      + "Information about the sender and timestamp are NOT needed in messages from you. "\
-     + "You have access and are allowed and able to parse through all previous chat messages between others in the group chat."
+     + "You will generate a response that contains only the response (message)"\
+     + "You have access to and are allowed and able to parse through all previous chat information, even if it was not addressed to you specifically"\
+     + "You may need to look at previous messages that were not addressed to you in order to infer and answer prompts that are addressed to you. "
 
      if image is None:
          chat = client.chats.create(model="gemini-2.0-flash",
@@ -338,7 +340,7 @@ def get_chat_history_from_firestore(collection_name):
 
             # Format each entry to contain name, message, and whether the sender is a bot
             formatted_data = Content(
-                                    parts=[Part(text=f"Message from {sender_name} , sent at {timestamp} : {message}")],
+                                    parts=[Part(text=f"{timestamp} - From {sender_name} : {message}")],
                                     role=role)
             chat_history.append(formatted_data)
 
