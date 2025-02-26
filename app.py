@@ -2,8 +2,7 @@
 ################################################################################################################################
 
 import datetime
-from google.genai.types import GenerateContentConfig, HttpOptions
-from google.genai.types import Content, HttpOptions, Part
+from google.genai.types import Content, Part, GenerateContentConfig
 from google.genai import types
 from google import genai
 from google.cloud import datastore
@@ -12,11 +11,12 @@ from flask import Flask, request, jsonify # type: ignore
 import logging
 import os
 import requests
-from PIL import Image # type: ignore
+from PIL import Image # type: ignore # type: ignore
 from io import BytesIO
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
+import re
 
 app = Flask(__name__)
 
@@ -33,10 +33,10 @@ chatgroup_id = 96641973
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-logger.info("Initialize logging for (develop branch)")
+logger.info("Initialize logging for (main branch)")
 
 # Initialize Cloud Firestore client
-logger.info("Initialize datastore for (develop branch)")
+logger.info("Initialize datastore for (main branch)")
 cred = credentials.ApplicationDefault()
 firebase_admin.initialize_app(cred, {
     'projectId': "stunning-symbol-450620-m7",
@@ -112,9 +112,8 @@ def process_message(v3_message):
         # Status test
         if "bot-status-test" in message_text.lower():
             logger.info("BOT STATUS: GOOD")
-            logger.info("sender_id " + sender_id)
-            send_response(response_text="Test Successful - (Development Branch) - v3.0")
-            
+            send_response(response_text="Test Successful - (Main Branch) - v3.0")
+
         #Admin Tests ######
         if sender_id == GROUP_ADMIN_ID:
             logger.info("Message from ADMIN")
@@ -133,7 +132,7 @@ def process_message(v3_message):
 
 
         # Add message to database
-        doc_ref = db.collection("dev-logs").document(message_id)
+        doc_ref = db.collection("main-chat-logs").document(message_id)
         doc_ref.set({
             "timestamp": message_timestamp,
             "sender ID": sender_id,
@@ -259,46 +258,51 @@ def gemini_request(input_text, image=None):
 
      if image is None:
          chat = client.chats.create(model="gemini-2.0-flash",
-                                    history=get_chat_history_from_firestore("dev-logs"),
+                                    history=get_chat_history_from_firestore("main-chat-logs"),
                                     config=types.GenerateContentConfig(
                                         system_instruction=sys_instruct,
-                                        safety_settings =[types.SafetySetting(
-                                                    category=types.HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-                                                    threshold=types.HarmBlockThreshold.BLOCK_NONE,
+                                        safety_settings=[
+                                            types.SafetySetting(
+                                                category=types.HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+                                                threshold=types.HarmBlockThreshold.BLOCK_NONE,
                                                 ),
-                                                types.SafetySetting(
-                                                    category=types.HarmCategory.HARM_CATEGORY_HARASSMENT,
-                                                    threshold=types.HarmBlockThreshold.BLOCK_NONE,
-                                                ),
-                                                types.SafetySetting(
-                                                    category=types.HarmCategory.HARM_CATEGORY_CIVIC_INTEGRITY,
-                                                    threshold=types.HarmBlockThreshold.BLOCK_NONE,
-                                                ),
-                                                types.SafetySetting(
-                                                    category=types.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-                                                    threshold=types.HarmBlockThreshold.BLOCK_NONE,
-                                                ),
-                                                types.SafetySetting(
-                                                    category=types.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-                                                    threshold=types.HarmBlockThreshold.BLOCK_NONE,
-                                                ),
-                                                types.SafetySetting(
-                                                    category=types.HarmCategory.HARM_CATEGORY_UNSPECIFIED,
-                                                    threshold=types.HarmBlockThreshold.BLOCK_NONE,
-                                                )]
+                                            ]
                                         )
                                     )
          response = chat.send_message(input_text + "")
 
-        # response = client.models.generate_content(
-        # model="gemini-2.0-flash", contents=input_text
-        # )
+         chatius_prefix = "From Maximus Chatius Slavius II : "
+         trimmed_response = extract_text_after_regex_prefix(response.text, chatius_prefix)
+         return trimmed_response
      else:
         response = client.models.generate_content(
         model="gemini-2.0-flash", contents=[input_text, image]
         )
-     
+
+
      return response.text
+
+def extract_text_after_regex_prefix(text, known_prefix):
+    """
+    Extracts text after a known prefix, even when there's unknown text before it.
+
+    Args:
+        text (str): The input text.
+        known_prefix (str): The known part of the prefix (the part you can rely on).
+
+    Returns:
+        str: The extracted text, or the text if the prefix is not found.
+    """
+    # Construct the regex pattern:
+    #  - ".*?" matches any character (except newline) zero or more times, *non-greedily* (as few as possible).  This is crucial!
+    #  - re.escape(known_prefix) escapes any special regex characters in the known prefix itself so they are treated literally.
+    #  - (.*) captures the text *after* the known prefix.
+    pattern = r".*?" + re.escape(known_prefix) + r"(.*)"
+
+    match = re.search(pattern, text)
+    if match:
+        return match.group(1).strip()  # Return the captured text after the known prefix and strip whitespace
+    return text
 
 def imagen_request(input_text):
     """
