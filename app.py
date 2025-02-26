@@ -259,7 +259,7 @@ def gemini_request(input_text, image=None):
                                     history=get_chat_history_from_firestore("main-chat-logs"),
                                     config=types.GenerateContentConfig(
                                         system_instruction=sys_instruct,
-                                        safety_settings=safety_settings
+                                        # safety_settings=safety_settings
                                         )
                                     )
          response = chat.send_message(input_text + "    (reminder not to respond with timestamp or sender data)")
