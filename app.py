@@ -265,9 +265,11 @@ def gemini_request(input_text, image=None):
                                         )
                                     )
          response = chat.send_message(input_text + "")
+         logger.info(f"Gemini Response : {response}")
 
          chatius_prefix = "From Maximus Chatius Slavius II : "
          trimmed_response = extract_text_after_regex_prefix(response.text, chatius_prefix)
+         logger.info(f"Trimmed response : {trimmed_response}")
          return trimmed_response
      else:
         response = client.models.generate_content(
