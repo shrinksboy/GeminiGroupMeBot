@@ -257,7 +257,7 @@ def gemini_request(input_text, image=None):
      if image is None:
          chat = client.chats.create(model="gemini-2.0-flash",
                                     history=get_chat_history_from_firestore("main-chat-logs"),
-                                    config=GenerateContentConfig(
+                                    config=types.GenerateContentConfig(
                                         system_instruction=sys_instruct,
                                         safety_settings=safety_settings
                                         )
