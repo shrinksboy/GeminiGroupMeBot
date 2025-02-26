@@ -16,6 +16,7 @@ from io import BytesIO
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
+import re
 
 app = Flask(__name__)
 
@@ -265,15 +266,38 @@ def gemini_request(input_text, image=None):
                                     )
          response = chat.send_message(input_text + "")
 
-        # response = client.models.generate_content(
-        # model="gemini-2.0-flash", contents=input_text
-        # )
+         chatius_prefix = "From Maximus Chatius Slavius II : "
+         trimmed_response = extract_text_after_regex_prefix(response.text, chatius_prefix)
+         return trimmed_response
      else:
         response = client.models.generate_content(
         model="gemini-2.0-flash", contents=[input_text, image]
         )
-     
+
+
      return response.text
+
+def extract_text_after_regex_prefix(text, known_prefix):
+    """
+    Extracts text after a known prefix, even when there's unknown text before it.
+
+    Args:
+        text (str): The input text.
+        known_prefix (str): The known part of the prefix (the part you can rely on).
+
+    Returns:
+        str: The extracted text, or None if the prefix is not found.
+    """
+    # Construct the regex pattern:
+    #  - ".*?" matches any character (except newline) zero or more times, *non-greedily* (as few as possible).  This is crucial!
+    #  - re.escape(known_prefix) escapes any special regex characters in the known prefix itself so they are treated literally.
+    #  - (.*) captures the text *after* the known prefix.
+    pattern = r".*?" + re.escape(known_prefix) + r"(.*)"
+
+    match = re.search(pattern, text)
+    if match:
+        return match.group(1).strip()  # Return the captured text after the known prefix and strip whitespace
+    return None
 
 def imagen_request(input_text):
     """
