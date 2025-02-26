@@ -3,7 +3,8 @@
 
 import datetime
 from google.genai.types import GenerateContentConfig, HttpOptions
-from google.genai import Content, HttpOptions, Part, types
+from google.genai.types import Content, HttpOptions, Part
+from google.genai import types
 from google import genai
 from google.cloud import datastore
 import http
