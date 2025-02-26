@@ -9,3 +9,6 @@ google-cloud-datastore==2.15.0
 googleapis-common-protos==1.60.0
 grpcio==1.59.0
 Pillow
+google-cloud-firestore
+firebase-admin
+google.ai.generativelanguage
