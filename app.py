@@ -297,11 +297,11 @@ def extract_text_after_regex_prefix(text, known_prefix):
     #  - ".*?" matches any character (except newline) zero or more times, *non-greedily* (as few as possible).  This is crucial!
     #  - re.escape(known_prefix) escapes any special regex characters in the known prefix itself so they are treated literally.
     #  - (.*) captures the text *after* the known prefix.
-    pattern = r".*?" + re.escape(known_prefix) + r"(.*)"
+    pattern = r".*?" + re.escape(known_prefix) + r"(.*)" # Regex
 
     match = re.search(pattern, text)
     if match:
-        return match.group(1).strip()  # Return the captured text after the known prefix and strip whitespace
+        return match.group(1)  # Return *only* the text *after* the known prefix
     return text
 
 def imagen_request(input_text):
