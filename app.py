@@ -132,7 +132,7 @@ def process_message(v3_message):
 
 
         # Add message to database
-        doc_ref = db.collection("main-chat-logs").document(message_id)
+        doc_ref = db.collection("main-chat-logs-2").document(message_id)
         doc_ref.set({
             "timestamp": message_timestamp,
             "sender ID": sender_id,
@@ -259,7 +259,7 @@ def gemini_request(input_text, image=None):
 
      if image is None:
          chat = client.chats.create(model="gemini-2.0-flash",
-                                    history=get_chat_history_from_firestore("main-chat-logs"),
+                                    history=get_chat_history_from_firestore("main-chat-logs-2"),
                                     config=types.GenerateContentConfig(
                                         system_instruction=sys_instruct,
                                         # safety_settings=safety_settings
