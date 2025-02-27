@@ -4,6 +4,8 @@
 import datetime
 from google.genai.types import Content, Part, GenerateContentConfig
 from google.genai import types
+from google.genai.types import Content, Part, GenerateContentConfig
+from google.genai import types
 from google import genai
 from google.cloud import datastore
 import http
@@ -29,7 +31,6 @@ GROUP_ADMIN_ID = os.environ.get("GROUP_ADMIN_ID") # Groupme sender_id that has a
 FIREBASE_CHAT_LOG_COLLECTION = os.environ.get("CHAT_LOG_COLLECTION")
 
 client = genai.Client(api_key=GOOGLE_API_KEY)
-chatgroup_id = 96641973
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -45,8 +46,8 @@ firebase_admin.initialize_app(cred, {
 
 db = firestore.client()
 
-# Create data
-doc_ref = db.collection("logs").document("test")
+# Create test data
+doc_ref = db.collection("test").document("test")
 doc_ref.set({
     "timestamp": "NOW()",
     "message": "Testing testing"
@@ -64,7 +65,7 @@ def webhook_handler():
         # Extract data from the request
         data = request.get_json()
 
-        # Process the V3 message (Implement your logic here)
+        # Process the V3 message
         if data:
             logger.info(f"Received V3 message: {data}")
             response_message = process_message(data)  # Call function to handle the processing
@@ -93,7 +94,7 @@ def process_message(v3_message):
     try:
         # Extract relevant information from the message
         message_id = v3_message.get("id") # get id of v3 message
-        sender_name = v3_message.get("name", "Unknown Sender")  # Get sender name, default to "Unknown Sender"
+        sender_name = v3_message.get("name", "Unknown Sender")  # Get sender name
         message_text = v3_message.get("text", "")  # Get message text, default to empty string
         group_id = v3_message.get("group_id", "Unknown Group")
         sender_id = v3_message.get("sender_id", "Unknown Sender ID")
@@ -113,23 +114,12 @@ def process_message(v3_message):
         # Status test
         if "bot-status-test" in message_text.lower():
             logger.info("BOT STATUS: GOOD")
-            send_response(response_text="Test Successful - (Develop Branch) - v3.0")
+            send_response(response_text="Test Successful - (Development Branch) - v3.0")
 
-        #Admin Tests ######
+        #Admin Tests
         if sender_id == GROUP_ADMIN_ID:
             logger.info("Message from ADMIN")
-
-            # Image test
-        if "bot-image-test" in message_text.lower():
-            logger.info("Image Sending Test")
-            send_response(response_text="Image Test", image_url="https://i.groupme.com/630x630.jpeg.6772b62a25f94ac09169928658de6612")
-
-            # Image upload
-        if "bot-image-analyze-test" in message_text.lower():
-            logger.info("Image analyzer test")
-            attachment_image = load_image("https://i.groupme.com/630x630.jpeg.6772b62a25f94ac09169928658de6612")
-            response_text = gemini_request("analyze this image", attachment_image)
-            send_response(response_text)
+            run_admin_tests(message_text)
 
 
         # Add message to database
@@ -141,7 +131,7 @@ def process_message(v3_message):
             "sender type": sender_type,
             "message": message_text
         })
-                 
+              
 
         # Check if chatbot response needs to be sent back
         if message_text.lower().startswith("@chatius-art"):
@@ -215,7 +205,7 @@ def send_response(response_text, image_url=None):
 
 ##########################################
 
-# Define safety settings
+# Define safety settings      # TODO: Make this shit work      
 safety_settings = [
         types.SafetySetting(
             category=types.HarmCategory.HARM_CATEGORY_HATE_SPEECH,
@@ -248,34 +238,32 @@ def gemini_request(input_text, image=None):
      Sends text and possible attached image to gemini api and returns text response
      """
      client = genai.Client(api_key=GOOGLE_API_KEY)
-     # System Instructions for gemini
-     sys_instruct = "You are a chatbot in a GroupMe group chat. Your name is Maximus Chatius Slavius II, or just Chatius for short. "\
-     + "Incoming messages will be in the format of: 'Message from (sender_name) , sent at (timestamp) : (message) . Your generated responses wil NOT be in this format. "\
-     + "You will just generate the response (message) text. "\
-     + "Information about the sender and timestamp are NOT needed in messages from you. "\
-     + "You will generate a response that contains only the response (message)"\
-     + "You have access to and are allowed and able to parse through all previous chat information, even if it was not addressed to you specifically"\
-     + "You may need to look at previous messages that were not addressed to you in order to infer and answer prompts that are addressed to you. "
+     # Retrieve System Instructions for gemini
+     # The config file is stored in the same database as the chat logs
+     sys_instruct = get_config_data("sys_instructions") 
 
-     if image is None:
+     if image is None: # If there isnt an attached image, create a chat model with the history
          chat = client.chats.create(model="gemini-2.0-flash",
                                     history=get_chat_history_from_firestore(FIREBASE_CHAT_LOG_COLLECTION),
                                     config=types.GenerateContentConfig(
                                         system_instruction=sys_instruct,
-                                        safety_settings=[
-                                            types.SafetySetting(
-                                                category=types.HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-                                                threshold=types.HarmBlockThreshold.BLOCK_NONE,
-                                                ),
-                                            ]
+                                        # safety_settings=safety_settings
                                         )
                                     )
          response = chat.send_message(input_text + "")
+         logger.info(f"Gemini Response : {response}")
 
-         chatius_prefix = "From Maximus Chatius Slavius II : "
+         # The following is the bane of my existance: try to filter and trim the timestamp and sender name formatting that may (or may not) be included with the gemini response.
+         # and sometimes it will not be in the same format, just for shits and giggles
+         chatius_prefix = " - From Maximus Chatius Slavius II :"
          trimmed_response = extract_text_after_regex_prefix(response.text, chatius_prefix)
-         return trimmed_response
-     else:
+         logger.info(f"Trimmed response : {trimmed_response}")
+         response = extract_text_after_num_of_chars_if_prefix(response.text, 59, chatius_prefix)
+
+         return response
+    
+
+     else: # If theres an image, don't worry about the history
         response = client.models.generate_content(
         model="gemini-2.0-flash", contents=[input_text, image]
         )
@@ -283,29 +271,58 @@ def gemini_request(input_text, image=None):
 
      return response.text
 
-def extract_text_after_regex_prefix(text, known_prefix):
+def extract_text_after_num_of_chars_if_prefix(text, num_of_chars, prefix):
     """
-    Extracts text after a known prefix, even when there's unknown text before it.
+    Method to simply check if an input text contains a known prefix, and if it does trim a set number of characters.
 
-    Args:
-        text (str): The input text.
-        known_prefix (str): The known part of the prefix (the part you can rely on).
+    shitty hack, but it works
+    """
+    if prefix in text:
+        return text[num_of_chars:]
+    else :
+        return text
+    
+def get_config_data(field_name):
+    """
+    Retrieves config values.
+    If shit goes wrong, or the field is missing, it returns ""
+    """
 
-    Returns:
-        str: The extracted text, or the text if the prefix is not found.
+    try:
+        doc_ref = db.collection("config").document("config") #change the collection
+        doc = doc_ref.get()
+
+        if doc.exists: # Verify that it exists.
+            config_data = doc.to_dict()
+            #To get the data, specify it in the parameters.
+
+            return config_data.get(field_name, "") #Check for the data in the dictionary
+        else:
+            print(f"The config document does not exist")
+            return "" # If it doesnt return then simply return blank
+
+
+    except Exception as e:
+        print(f"An error occurred when trying to get settings: {e}")
+        return "" # Error value.
+    
+
+def extract_text_after_regex_prefix(text, known_prefix):  # TODO: Fix this stupid regex 
+    """
+    Extracts text after a known regular expression prefix, even when there's unknown text before the prefix.
+
+    CURRENT ISSUES: The regex currently also trims any text after escape characters '\n'
+                    This fucks the output when gemini is generating lists, or any content that contains line breaks
     """
     # Construct the regex pattern:
-    #  - ".*?" matches any character (except newline) zero or more times, *non-greedily* (as few as possible).  This is crucial!
-    #  - re.escape(known_prefix) escapes any special regex characters in the known prefix itself so they are treated literally.
-    #  - (.*) captures the text *after* the known prefix.
-    pattern = r".*?" + re.escape(known_prefix) + r"(.*)" # Regex
+    pattern = r".*?" + re.escape(known_prefix) + r"(.*)"
 
     match = re.search(pattern, text)
     if match:
-        return match.group(1)  # Return *only* the text *after* the known prefix
+        return match.group(1)  # Return only the text after the known prefix
     return text
 
-def imagen_request(input_text):
+def imagen_request(input_text): # TODO: implement google imagen model to allow for image generation upon request
     """
      Sends text to imagen api and returns image url response
     """
@@ -323,10 +340,12 @@ def imagen_request(input_text):
 ##########################################
 
 def convert_timestamp(timestamp):
-    """Converts a Unix timestamp to a datetime object."""
+    """
+    Converts a Unix timestamp to a datetime object.
+    """
     try:
         # Convert the timestamp to a datetime object (in UTC)
-        datetime_object = datetime.datetime.utcfromtimestamp(timestamp)
+        datetime_object = datetime.datetime.utcfromtimestamp(timestamp)  # TODO: stop using deprecated method
         # Format the datetime object as a string
         formatted_datetime = datetime_object.strftime("%Y-%m-%d %H:%M:%S UTC")
         return formatted_datetime
@@ -335,14 +354,18 @@ def convert_timestamp(timestamp):
         return None
 
 def image_to_bytes(image):
-    """Converts a PIL Image object to bytes."""
+    """
+    Converts a PIL Image object to bytes.
+    """
     img_byte_arr = BytesIO()
-    image.save(img_byte_arr, format='JPEG')  # You can change the format here (e.g., PNG)
+    image.save(img_byte_arr, format='JPEG')
     img_byte_arr = img_byte_arr.getvalue()
     return img_byte_arr
 
 def upload_image_to_groupme(image_bytes):
-    """Uploads image bytes to the GroupMe Image Service and returns the URL."""
+    """
+    Uploads image bytes to the GroupMe Image Service and returns the URL.
+    """
     try:
         files = {'file': image_bytes}  # The key "file" is required by the GroupMe API
         response = requests.post(IMAGE_SERVICE_URL, files=files)
@@ -355,7 +378,9 @@ def upload_image_to_groupme(image_bytes):
     
 
 def get_chat_history_from_firestore(collection_name):
-    """Retrieves the entire chat history from Firestore for a given group and formats it for Gemini."""
+    """
+    Retrieves the entire chat history from Firestore for a given group and formats it for Gemini
+    """
     chat_history = []
     try:
         # Reference to the collection
@@ -376,9 +401,9 @@ def get_chat_history_from_firestore(collection_name):
             if sender_type == "user":
                 role = "user"
             elif sender_type == "bot":
-                role = "model" # Use model role for bot responses. In this case, what does the bot do?
+                role = "model" # Use model role for bot responses
             else:
-                role = "user"  # or you can skip this document
+                role = "user"
 
             # Format each entry to contain name, message, and whether the sender is a bot
             formatted_data = Content(
@@ -389,6 +414,19 @@ def get_chat_history_from_firestore(collection_name):
     except Exception as e:
         print(f"Error retrieving chat history from Firestore: {e}")
     return chat_history
+
+def run_admin_tests(message_text):
+    # Image test
+    if "bot-image-test" in message_text.lower():
+        logger.info("Image Sending Test")
+        send_response(response_text="Image Test", image_url="https://i.groupme.com/630x630.jpeg.6772b62a25f94ac09169928658de6612")
+
+        # Image upload
+    if "bot-image-analyze-test" in message_text.lower():
+        logger.info("Image analyzer test")
+        attachment_image = load_image("https://i.groupme.com/630x630.jpeg.6772b62a25f94ac09169928658de6612")
+        response_text = gemini_request("analyze this image", attachment_image)
+        send_response(response_text)
 
 
 @app.route('/health', methods=['GET'])
