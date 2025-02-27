@@ -28,16 +28,17 @@ GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")  # Get google api key from the
 GROUPME_API_URL = "https://api.groupme.com/v3/bots/post"  # GroupMe API endpoint
 IMAGE_SERVICE_URL = "https://image.groupme.com"
 GROUP_ADMIN_ID = os.environ.get("GROUP_ADMIN_ID") # Groupme sender_id that has admin rights
+FIREBASE_CHAT_LOG_COLLECTION = os.environ.get("CHAT_LOG_COLLECTION")
 
 client = genai.Client(api_key=GOOGLE_API_KEY)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-logger.info("Initialize logging for (Develop branch)")
+logger.info("Initialize logging for (Main branch)")
 
 # Initialize Cloud Firestore client
-logger.info("Initialize datastore for (Develop branch)")
+logger.info("Initialize datastore for (Main branch)")
 cred = credentials.ApplicationDefault()
 firebase_admin.initialize_app(cred, {
     'projectId': "stunning-symbol-450620-m7",
@@ -113,7 +114,7 @@ def process_message(v3_message):
         # Status test
         if "bot-status-test" in message_text.lower():
             logger.info("BOT STATUS: GOOD")
-            send_response(response_text="Test Successful - (Develop Branch) - v3.0")
+            send_response(response_text="Test Successful - (Main Branch) - v3.0")
 
         #Admin Tests
         if sender_id == GROUP_ADMIN_ID:
@@ -122,7 +123,7 @@ def process_message(v3_message):
 
 
         # Add message to database
-        doc_ref = db.collection("dev-logs").document(message_id)
+        doc_ref = db.collection(FIREBASE_CHAT_LOG_COLLECTION).document(message_id)
         doc_ref.set({
             "timestamp": message_timestamp,
             "sender ID": sender_id,
@@ -249,7 +250,7 @@ def gemini_request(input_text, image=None):
 
      if image is None: # If there isnt an attached image, create a chat model with the history
          chat = client.chats.create(model="gemini-2.0-flash",
-                                    history=get_chat_history_from_firestore("dev-logs"),
+                                    history=get_chat_history_from_firestore(FIREBASE_CHAT_LOG_COLLECTION),
                                     config=types.GenerateContentConfig(
                                         system_instruction=sys_instruct,
                                         # safety_settings=safety_settings
