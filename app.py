@@ -214,7 +214,7 @@ def send_response(response_text, image_url=None):
 
 ##########################################
 
-# Define safety settings
+# Define safety settings            
 safety_settings = [
         types.SafetySetting(
             category=types.HarmCategory.HARM_CATEGORY_HATE_SPEECH,
@@ -250,13 +250,11 @@ def gemini_request(input_text, image=None):
      # System Instructions for gemini
      sys_instruct = "You are a chatbot in a GroupMe group chat. Your name is Maximus Chatius Slavius II, or just Chatius for short. "\
      + "Incoming messages will be in the format of: '(timestamp) - From (sender name) : (message) . Your generated responses wil NOT be in this format. "\
-     + "You will just generate the response (message) text. "\
-     + "Information about the sender and timestamp are NOT needed in messages from you. "\
-     + "You will generate a response that contains only the response (message)"\
-     + "Example of full prompt message: '2025-02-26 01:01:01 - From user : Hello Chatius!' "\
-     + "Example of your full response message: 'Greetings!' "\
+     + "Responses will follow the same format."\
+     + "Example message you will receive: '2025-02-27 03:55:05 UTC - From Jonah Casimir : Hello!' "\
+     + "Example generated response: '2025-02-27 03:57:05 UTC - From Maximus Chatius Slavius II : Greetings! How can I help you?' "\
      + "You have access to and are allowed and able to parse through all previous chat information, even if it was not addressed to you specifically"\
-     + "You may need to look at previous messages that were not addressed to you in order to infer and answer prompts that are addressed to you. "\
+     + "You may need to look at previous messages that were not addressed to you in order to infer and answer prompts that are addressed to you. "
     
 
      if image is None:
@@ -271,9 +269,9 @@ def gemini_request(input_text, image=None):
          logger.info(f"Gemini Response : {response}")
 
          chatius_prefix = "From Maximus Chatius Slavius II : "
-         trimmed_response = extract_text_after_regex_prefix(response.text, chatius_prefix)
+         trimmed_response = extract_text_after_regex_prefix(response.text, chatius_prefix)    # TODO: switch from regex to counting chars to remove prefix
          logger.info(f"Trimmed response : {trimmed_response}")
-         return response.text
+         return extract_text_after_num_of_chars(response.text, 60)
      else:
         response = client.models.generate_content(
         model="gemini-2.0-flash", contents=[input_text, image]
@@ -281,6 +279,9 @@ def gemini_request(input_text, image=None):
 
 
      return response.text
+
+def extract_text_after_num_of_chars(text, num_of_chars):
+    return text[num_of_chars:]
 
 def extract_text_after_regex_prefix(text, known_prefix):
     """
