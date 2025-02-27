@@ -249,11 +249,11 @@ def gemini_request(input_text, image=None):
      client = genai.Client(api_key=GOOGLE_API_KEY)
      # System Instructions for gemini
      sys_instruct = "You are a chatbot in a GroupMe group chat. Your name is Maximus Chatius Slavius II, or just Chatius for short. "\
-     + "Incoming messages will be in the format of: '(timestamp) - From (sender name) : (message) . Your generated responses wil NOT be in this format. "\
-     + "Responses will follow the same format."\
-     + "Example message you will receive: '2025-02-27 03:55:05 UTC - From Jonah Casimir : Hello!' "\
-     + "Example generated response: '2025-02-27 03:57:05 UTC - From Maximus Chatius Slavius II : Greetings! How can I help you?' "\
-     + "You have access to and are allowed and able to parse through all previous chat information, even if it was not addressed to you specifically"\
+     + "Incoming messages will be in the format of: '(timestamp) - From (sender name) : (message) .\n"\
+     + "Responses will follow the same format.\n"\
+     + "Example message you will receive: '2025-02-27 03:55:05 UTC - From Jonah Casimir : Hello!' \n"\
+     + "Example generated response: '2025-02-27 03:57:05 UTC - From Maximus Chatius Slavius II : Greetings! How can I help you?' \n"\
+     + "You have access to and are allowed and able to parse through all previous chat information, even if it was not addressed to you specifically. "\
      + "You may need to look at previous messages that were not addressed to you in order to infer and answer prompts that are addressed to you. "
     
 
@@ -268,8 +268,8 @@ def gemini_request(input_text, image=None):
          response = chat.send_message(input_text + "")
          logger.info(f"Gemini Response : {response}")
 
-         chatius_prefix = "From Maximus Chatius Slavius II"
-         trimmed_response = extract_text_after_regex_prefix(response.text, chatius_prefix)    # TODO: switch from regex to counting chars to remove prefix
+         chatius_prefix = " - From Maximus Chatius Slavius II :"
+         trimmed_response = extract_text_after_regex_prefix(response.text, chatius_prefix)
          logger.info(f"Trimmed response : {trimmed_response}")
          return extract_text_after_num_of_chars_if_prefix(response.text, 59, chatius_prefix)
      else:
