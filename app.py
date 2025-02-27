@@ -249,12 +249,15 @@ def gemini_request(input_text, image=None):
      client = genai.Client(api_key=GOOGLE_API_KEY)
      # System Instructions for gemini
      sys_instruct = "You are a chatbot in a GroupMe group chat. Your name is Maximus Chatius Slavius II, or just Chatius for short. "\
-     + "Incoming messages will be in the format of: 'Message from (sender_name) , sent at (timestamp) : (message) . Your generated responses wil NOT be in this format. "\
+     + "Incoming messages will be in the format of: '(timestamp) - From (sender name) : (message) . Your generated responses wil NOT be in this format. "\
      + "You will just generate the response (message) text. "\
      + "Information about the sender and timestamp are NOT needed in messages from you. "\
      + "You will generate a response that contains only the response (message)"\
+     + "Example of full prompt message: '2025-02-26 01:01:01 - From user : Hello Chatius!' "\
+     + "Example of your full response message: 'Greetings!' "\
      + "You have access to and are allowed and able to parse through all previous chat information, even if it was not addressed to you specifically"\
-     + "You may need to look at previous messages that were not addressed to you in order to infer and answer prompts that are addressed to you. "
+     + "You may need to look at previous messages that were not addressed to you in order to infer and answer prompts that are addressed to you. "\
+    
 
      if image is None:
          chat = client.chats.create(model="gemini-2.0-flash",
@@ -270,7 +273,7 @@ def gemini_request(input_text, image=None):
          chatius_prefix = "From Maximus Chatius Slavius II : "
          trimmed_response = extract_text_after_regex_prefix(response.text, chatius_prefix)
          logger.info(f"Trimmed response : {trimmed_response}")
-         return trimmed_response
+         return response.text
      else:
         response = client.models.generate_content(
         model="gemini-2.0-flash", contents=[input_text, image]
