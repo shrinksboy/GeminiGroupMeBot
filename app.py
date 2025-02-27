@@ -268,10 +268,10 @@ def gemini_request(input_text, image=None):
          response = chat.send_message(input_text + "")
          logger.info(f"Gemini Response : {response}")
 
-         chatius_prefix = "From Maximus Chatius Slavius II : "
+         chatius_prefix = "From Maximus Chatius Slavius II"
          trimmed_response = extract_text_after_regex_prefix(response.text, chatius_prefix)    # TODO: switch from regex to counting chars to remove prefix
          logger.info(f"Trimmed response : {trimmed_response}")
-         return extract_text_after_num_of_chars(response.text, 60)
+         return extract_text_after_num_of_chars_if_prefix(response.text, 59, chatius_prefix)
      else:
         response = client.models.generate_content(
         model="gemini-2.0-flash", contents=[input_text, image]
@@ -280,8 +280,12 @@ def gemini_request(input_text, image=None):
 
      return response.text
 
-def extract_text_after_num_of_chars(text, num_of_chars):
-    return text[num_of_chars:]
+def extract_text_after_num_of_chars_if_prefix(text, num_of_chars, prefix):
+    if prefix in text:
+        return text[num_of_chars:]
+    else :
+        return text
+    
 
 def extract_text_after_regex_prefix(text, known_prefix):
     """
