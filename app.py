@@ -134,13 +134,13 @@ def process_message(v3_message):
               
 
         # Check if chatbot response needs to be sent back
-        # if message_text.lower().startswith("@chatius-art"):
-        #     message_text = message_text[len("@chatius-art"):].strip() # Remove "@chatius-art" from the beginning of the message
+        if message_text.lower().startswith("@chatius-art"):
+            message_text = message_text[len("@chatius-art"):].strip() # Remove "@chatius-art" from the beginning of the message
 
-        #     generated_image_url = imagen_request(message_text)
-        #     response_text = "Here's your image, human"
+            generated_image_url = imagen_request(message_text)
+            response_text = "Here's your image, human"
 
-        #     send_response(response_text, generated_image_url)
+            send_response(response_text, generated_image_url)
 
         if message_text.lower().startswith("@chatius"):
              
@@ -238,15 +238,9 @@ def gemini_request(input_text, image=None):
      Sends text and possible attached image to gemini api and returns text response
      """
      client = genai.Client(api_key=GOOGLE_API_KEY)
-     # System Instructions for gemini
-     sys_instruct = "You are a chatbot in a GroupMe group chat. Your name is Maximus Chatius Slavius II, or just Chatius for short. "\
-     + "Incoming messages will be in the format of: '(timestamp) - From (sender name) : (message) .\n"\
-     + "Responses will follow the same format.\n"\
-     + "Example message you will receive: '2025-02-27 03:55:05 UTC - From Jonah Casimir : Hello!' \n"\
-     + "Example generated response: '2025-02-27 03:57:05 UTC - From Maximus Chatius Slavius II : Greetings! How can I help you?' \n"\
-     + "You have access to and are allowed and able to parse through all previous chat information, even if it was not addressed to you specifically. "\
-     + "You may need to look at previous messages that were not addressed to you in order to infer and answer prompts that are addressed to you. "
-    
+     # Retrieve System Instructions for gemini
+     # The config file is stored in the same database as the chat logs
+     sys_instruct = get_config_data("sys_instructions") 
 
      if image is None: # If there isnt an attached image, create a chat model with the history
          chat = client.chats.create(model="gemini-2.0-flash",
@@ -287,6 +281,30 @@ def extract_text_after_num_of_chars_if_prefix(text, num_of_chars, prefix):
         return text[num_of_chars:]
     else :
         return text
+    
+def get_config_data(field_name):
+    """
+    Retrieves config values.
+    If shit goes wrong, or the field is missing, it returns ""
+    """
+
+    try:
+        doc_ref = db.collection("config").document("config") #change the collection
+        doc = doc_ref.get()
+
+        if doc.exists: # Verify that it exists.
+            config_data = doc.to_dict()
+            #To get the data, specify it in the parameters.
+
+            return config_data.get(field_name, "") #Check for the data in the dictionary
+        else:
+            print(f"The config document does not exist")
+            return "" # If it doesnt return then simply return blank
+
+
+    except Exception as e:
+        print(f"An error occurred when trying to get settings: {e}")
+        return "" # Error value.
     
 
 def extract_text_after_regex_prefix(text, known_prefix):  # TODO: Fix this stupid regex 
