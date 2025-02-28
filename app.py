@@ -255,10 +255,10 @@ def gemini_request(input_text, image=None):
 
          # The following is the bane of my existance: try to filter and trim the timestamp and sender name formatting that may (or may not) be included with the gemini response.
          # and sometimes it will not be in the same format, just for shits and giggles
-         chatius_prefix = " - From Maximus Chatius Slavius II :"
+         chatius_prefix = " - From Maximus Chatius Slavius II"
          trimmed_response = extract_text_after_regex_prefix(response.text, chatius_prefix)
          logger.info(f"Trimmed response : {trimmed_response}")
-         response = extract_text_after_num_of_chars_if_prefix(response.text, 59, chatius_prefix)
+         response = extract_text_after_num_of_chars_if_prefix(response.text, 58, chatius_prefix)
 
          return response
     
