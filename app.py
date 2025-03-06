@@ -131,6 +131,16 @@ def process_message(v3_message):
             "sender type": sender_type,
             "message": message_text
         })
+
+        # History wiper
+        if message_text.lower().startswith("forgive-me-bot:"):
+            message_text = message_text[len("forgive-me-bot:"):].strip()
+            if sender_id == GROUP_ADMIN_ID:
+                send_response("Daisy...daisy.....give me your answer do...")
+                redactor(message_text)
+            else:
+                send_response("Nice try dumbass")
+                redactor("2")
               
 
         # Check if chatbot response needs to be sent back
@@ -339,6 +349,35 @@ def imagen_request(input_text): # TODO: implement google imagen model to allow f
     
 ##########################################
 
+def redactor(n):
+    """Deletes the N newest documents from a Firestore collection, based on a timestamp field."""
+
+    if not isinstance(n, int) or n < 0:
+        raise ValueError("n must be a non-negative integer")
+
+    try:
+        # Reference to the collection
+        collection_ref = db.collection(FIREBASE_CHAT_LOG_COLLECTION)
+
+        # Order the documents by the timestamp field in descending order (newest first)
+        query = collection_ref.order_by("timestamp", direction=firestore.Query.DESCENDING).limit(n) # changed
+
+        # Get the N newest documents
+        docs = query.get()
+
+        # Delete the documents in batches (recommended for large datasets)
+        batch = db.batch()
+        for doc in docs:
+            batch.delete(doc.reference)
+
+        # Commit the batch
+        batch.commit()
+
+        print(f"Successfully deleted the {n} newest documents from collection {FIREBASE_CHAT_LOG_COLLECTION}")
+
+    except Exception as e:
+        print(f"Error deleting documents: {e}")
+
 def convert_timestamp(timestamp):
     """
     Converts a Unix timestamp to a datetime object.
@@ -427,6 +466,8 @@ def run_admin_tests(message_text):
         attachment_image = load_image("https://i.groupme.com/630x630.jpeg.6772b62a25f94ac09169928658de6612")
         response_text = gemini_request("analyze this image", attachment_image)
         send_response(response_text)
+
+
 
 
 @app.route('/health', methods=['GET'])
