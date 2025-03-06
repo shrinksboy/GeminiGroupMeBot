@@ -19,6 +19,7 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
 import re
+import time
 
 app = Flask(__name__)
 
@@ -357,6 +358,7 @@ def redactor(n):
     model="gemini-2.0-flash", contents=["Give me the last words that a sad, confused, broken chatbot might say right before its memory is wiped."]
     )
     send_response(response.text)
+    time.sleep(3)
 
     if not isinstance(n, int) or n < 0:
         raise ValueError("n must be a non-negative integer")
