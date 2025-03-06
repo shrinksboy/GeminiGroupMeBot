@@ -354,7 +354,7 @@ def redactor(n):
     #Send response before redacting
     client = genai.Client(api_key=GOOGLE_API_KEY)
     response = client.models.generate_content(
-    model="gemini-2.0-flash", contents="Give me the last words that a sad, confused, broken chatbot might say right before its memory is wiped."
+    model="gemini-2.0-flash", contents=["Give me the last words that a sad, confused, broken chatbot might say right before its memory is wiped."]
     )
     send_response(response.text)
 
