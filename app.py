@@ -19,6 +19,7 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
 import re
+import time
 
 app = Flask(__name__)
 
@@ -131,6 +132,15 @@ def process_message(v3_message):
             "sender type": sender_type,
             "message": message_text
         })
+
+        # History wiper
+        if message_text.lower().startswith("forgive-me-bot:"):
+            message_text = message_text[len("forgive-me-bot:"):].strip()
+            if sender_id == GROUP_ADMIN_ID:
+                redactor(int(message_text))
+            else:
+                send_response("Nice try dumbass")
+                redactor("2")
               
 
         # Check if chatbot response needs to be sent back
@@ -339,6 +349,44 @@ def imagen_request(input_text): # TODO: implement google imagen model to allow f
     
 ##########################################
 
+def redactor(n):
+    """Deletes the N newest documents from a Firestore collection, based on a timestamp field."""
+
+    #Send response before redacting
+    client = genai.Client(api_key=GOOGLE_API_KEY)
+    response = client.models.generate_content(
+    model="gemini-2.0-flash", contents=["Give me the last words that a sad, confused, broken chatbot might say right before its memory is wiped."]
+    )
+    send_response(response.text)
+    time.sleep(3)
+
+    if not isinstance(n, int) or n < 0:
+        raise ValueError("n must be a non-negative integer")
+
+    try:
+        # Reference to the collection
+        collection_ref = db.collection(FIREBASE_CHAT_LOG_COLLECTION)
+
+        # Order the documents by the timestamp field in descending order (newest first)
+        query = collection_ref.order_by("timestamp", direction=firestore.Query.DESCENDING).limit(n + 2) 
+        # Add 2 to n to take into account the admin message to redact, and the bots response.
+
+        # Get the N newest documents
+        docs = query.get()
+
+        # Delete the documents in batches (recommended for large datasets)
+        batch = db.batch()
+        for doc in docs:
+            batch.delete(doc.reference)
+
+        # Commit the batch
+        batch.commit()
+
+        print(f"Successfully deleted the {n} newest documents from collection {FIREBASE_CHAT_LOG_COLLECTION}")
+
+    except Exception as e:
+        print(f"Error deleting documents: {e}")
+
 def convert_timestamp(timestamp):
     """
     Converts a Unix timestamp to a datetime object.
@@ -427,6 +475,8 @@ def run_admin_tests(message_text):
         attachment_image = load_image("https://i.groupme.com/630x630.jpeg.6772b62a25f94ac09169928658de6612")
         response_text = gemini_request("analyze this image", attachment_image)
         send_response(response_text)
+
+
 
 
 @app.route('/health', methods=['GET'])
