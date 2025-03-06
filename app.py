@@ -136,8 +136,7 @@ def process_message(v3_message):
         if message_text.lower().startswith("forgive-me-bot:"):
             message_text = message_text[len("forgive-me-bot:"):].strip()
             if sender_id == GROUP_ADMIN_ID:
-                send_response("Daisy...daisy.....give me your answer do...")
-                redactor(message_text)
+                redactor(int(message_text))
             else:
                 send_response("Nice try dumbass")
                 redactor("2")
@@ -352,6 +351,13 @@ def imagen_request(input_text): # TODO: implement google imagen model to allow f
 def redactor(n):
     """Deletes the N newest documents from a Firestore collection, based on a timestamp field."""
 
+    #Send response before redacting
+    client = genai.Client(api_key=GOOGLE_API_KEY)
+    response = client.models.generate_content(
+    model="gemini-2.0-flash", contents="Give me the last words that a sad, confused, broken chatbot might say right before its memory is wiped."
+    )
+    send_response(response)
+
     if not isinstance(n, int) or n < 0:
         raise ValueError("n must be a non-negative integer")
 
@@ -360,7 +366,8 @@ def redactor(n):
         collection_ref = db.collection(FIREBASE_CHAT_LOG_COLLECTION)
 
         # Order the documents by the timestamp field in descending order (newest first)
-        query = collection_ref.order_by("timestamp", direction=firestore.Query.DESCENDING).limit(n) # changed
+        query = collection_ref.order_by("timestamp", direction=firestore.Query.DESCENDING).limit(n + 2) 
+        # Add 2 to n to take into account the admin message to redact, and the bots response.
 
         # Get the N newest documents
         docs = query.get()
