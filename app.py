@@ -356,7 +356,7 @@ def redactor(n):
     response = client.models.generate_content(
     model="gemini-2.0-flash", contents="Give me the last words that a sad, confused, broken chatbot might say right before its memory is wiped."
     )
-    send_response(response)
+    send_response(response.text)
 
     if not isinstance(n, int) or n < 0:
         raise ValueError("n must be a non-negative integer")
