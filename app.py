@@ -140,7 +140,7 @@ def process_message(v3_message):
                 redactor(int(message_text))
             else:
                 send_response("Nice try dumbass")
-                redactor("2")
+                redactor(2)
               
 
         # Check if chatbot response needs to be sent back
